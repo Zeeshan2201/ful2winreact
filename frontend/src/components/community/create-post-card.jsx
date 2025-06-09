@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react"
 import { PlusCircle, X, Send, Calendar, Tag, BarChart2, ImageIcon, Film, Music, Palette, UserPlus } from "lucide-react"
 
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? "https://ful2win-backend.onrender.com"
+  ? "https://ful2winreact.onrender.com"
   : "http://localhost:5000"; // Use production URL in production, local in development
 
 export default function CreatePostCard({
