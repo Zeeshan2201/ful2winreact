@@ -1,0 +1,126 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    @apply bg-[#10101a] text-gray-100 font-sans min-h-screen;
+}
+
+/* Neon/gradient accent palette */
+:root {
+  --neon-purple: #a259ff;
+  --neon-blue: #3af2ff;
+  --neon-green: #00ffb2;
+  --neon-pink: #ff4b91;
+  --neon-yellow: #ffe156;
+  --glass-bg: rgba(24, 24, 40, 0.7);
+}
+
+/* Neon text and glow */
+.neon-text {
+  color: var(--neon-purple);
+  text-shadow: 0 0 8px var(--neon-purple), 0 0 16px var(--neon-blue);
+}
+.neon-glow {
+  box-shadow: 0 0 16px 2px var(--neon-blue), 0 0 32px 4px var(--neon-purple);
+}
+
+/* Glassmorphism utility */
+.glass-effect {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 1.5rem;
+    border: 1.5px solid rgba(255,255,255,0.08);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+}
+
+/* Card style */
+.card-dark {
+    background: linear-gradient(135deg, #181828 60%, #23234d 100%);
+    border-radius: 1.5rem;
+    box-shadow: 0 4px 32px 0 rgba(58,242,255,0.08);
+    border: 1.5px solid rgba(58,242,255,0.12);
+}
+
+/* Custom animations */
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+@keyframes pulse-glow {
+    0% { box-shadow: 0 0 0 0 var(--neon-purple, #a259ff); }
+    70% { box-shadow: 0 0 0 10px rgba(162,89,255,0); }
+    100% { box-shadow: 0 0 0 0 rgba(162,89,255,0); }
+}
+
+@keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.animate-float {
+    animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+    animation: pulse-glow 2s infinite;
+}
+
+.animate-gradient-shift {
+    background-size: 200% 200%;
+    animation: gradient-shift 5s ease infinite;
+}
+
+/* Enhanced 3D effects */
+.hover-3d {
+    transform-style: preserve-3d;
+    perspective: 1000px;
+}
+
+.hover-3d:hover {
+    transform: translateY(-5px) rotateX(5deg) rotateY(5deg);
+}
+
+/* Smooth transitions */
+.transition-3d {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #181828;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+    border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--neon-blue);
+}
+
+/* Custom horizontal scrollbar for carousels */
+.carousel-scrollbar::-webkit-scrollbar {
+  height: 10px;
+  background: transparent;
+}
+.carousel-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #a78bfa 0%, #3af2ff 100%);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px 0 rgba(99,102,241,0.15);
+}
+.carousel-scrollbar::-webkit-scrollbar-track {
+  background: #181828;
+  border-radius: 8px;
+}
+

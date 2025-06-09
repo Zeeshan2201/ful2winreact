@@ -1,0 +1,283 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400;500&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --RESULT-DIALOG-WIDTH: min(85vw, 500px);
+    --NAMES-DIALOG-WIDTH: min(85vw, 700px);
+    --HEADER-WIDTH: min(90vw, 550px);
+    --GAMEBOARD-SIDE: min(90vw, 470px);
+
+    --TITLE-FS: clamp(3rem, 13vw, 4.5rem);
+    --TURN-MSG-FS: clamp(1.5rem, 10vw, 2.5rem);
+    --PLAYER-SYMBOL-FS: clamp(2rem, 15vw, 5rem);
+    --FOOTER-FS: clamp(1rem, 5vw, 1.2rem);
+    --RESULT-DIALOG-FS: clamp(1.2rem, 8vw, 2.3rem);
+
+    --PRIMARY-COLOR: rgba(0, 0, 0, 0); /* Black with slight translucency */
+    --SECONDARY-COLOR: #FFFFFF; /* Solid white for dialogs */
+    --ACCENT-COLOR: #FFC107; /* Yellow from the "Play Online" button */
+    --TEXT-COLOR: #FFFFFF; /* White for readability on dark background */
+}
+
+html {
+    position: relative;
+    min-height: 100vh;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(145deg, #4A1A2F 60%, #7A2A3F 100%);
+    margin-bottom: 100px;
+    user-select: none;
+    color: var(--TEXT-COLOR);
+}
+
+/* HEADER */
+
+header {
+    padding-top: 30px;
+    margin-bottom: 40px;
+}
+
+header h1 {
+    margin: 0 auto;
+    padding: 20px 0;
+    width: var(--HEADER-WIDTH);
+    text-align: center;
+    font-family: 'Playfair Display', serif;
+    font-size: var(--TITLE-FS);
+    background: linear-gradient(145deg, var(--SECONDARY-COLOR) 100%, rgba(252, 252, 252, 0.2) 100%);
+    color: #7A2A3F;
+    border-radius: 15px;
+    box-shadow: 10px 25px 15px rgba(255, 255, 255, 0.3);
+    letter-spacing: 1.5px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.5s ease;
+}
+
+header h1:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(249, 248, 248, 0.4);
+    background: linear-gradient(145deg, var(--SECONDARY-COLOR) 30%, rgba(122, 42, 63, 0.4) 100%);
+}
+
+/* MAIN */
+
+main p {
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: var(--TURN-MSG-FS);
+    font-weight: 500;
+    color: var(--TEXT-COLOR);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+    padding: 5px 10px;
+    border-radius: 8px;
+}
+
+main .gameboard {
+    width: var(--GAMEBOARD-SIDE);
+    height: var(--GAMEBOARD-SIDE);
+    margin: 0 auto;
+    margin-bottom: 30px;
+    padding: 20px;
+    border-radius: 15px;
+    background: linear-gradient(145deg, var(--SECONDARY-COLOR) 50%, rgba(0, 0, 0, 0.1) 100%);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    display: grid;
+    gap: 5px;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.gameboard .gamecell {
+    border: 2px solid var(--ACCENT-COLOR);
+    font-size: var(--PLAYER-SYMBOL-FS);
+    cursor: pointer;
+    background: linear-gradient(145deg, rgba(161, 9, 9, 0.15), rgba(135, 6, 6, 0.05));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.gameboard .gamecell:hover {
+    background: linear-gradient(145deg, rgba(255, 193, 7, 0.3), rgba(255, 202, 40, 0.1));
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);
+}
+
+main button {
+    display: block;
+    font-family: 'Roboto', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin: 0 auto;
+    padding: 20px 70px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(145deg, var(--ACCENT-COLOR) 30%, #FFCA28 70%, var(--ACCENT-COLOR) 100%);
+    color: #000000;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s ease, background 0.5s ease, box-shadow 0.3s ease;
+}
+
+main button:hover {
+    background: linear-gradient(145deg, #FFCA28 30%, var(--ACCENT-COLOR) 70%, #FFCA28 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+}
+
+/* DIALOG */
+
+dialog {
+    position: fixed;
+    border: none;
+    border-radius: 15px;
+    background: linear-gradient(145deg, var(--SECONDARY-COLOR) 40%, #7A2A3F 100%); /* Opaque gradient */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    user-select: none;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+dialog::backdrop {
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(122, 42, 63, 0.6));
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* --- RESULT DIALOG */
+
+.result-dialog {
+    top: 300px;
+    left: calc(50% - (var(--RESULT-DIALOG-WIDTH) / 2));
+}
+
+.result-dialog h1 {
+    padding: 70px 10px;
+    width: var(--RESULT-DIALOG-WIDTH);
+    text-align: center;
+    font-family: 'Playfair Display', serif;
+    font-size: var(--RESULT-DIALOG-FS);
+    font-weight: 700;
+    color: #0d0101; /* White for better contrast on opaque deep red */
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* --- NAMES DIALOG */
+
+.names-dialog {
+    top: 200px;
+    left: calc(50% - (var(--NAMES-DIALOG-WIDTH) / 2));
+}
+
+.names-dialog form {
+    padding: 50px 0 70px 0;
+    width: var(--NAMES-DIALOG-WIDTH);
+    display: grid;
+    row-gap: 50px;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 1fr auto;
+    justify-items: center;
+}
+
+.names-dialog p.title {
+    grid-column: 1 / -1;
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #9b2727; /* White for contrast */
+    letter-spacing: 1px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.names-dialog p.player-name {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: #000000;
+}
+
+.names-dialog input {
+    width: 230px;
+    padding: 8px;
+    border: 2px solid var(--ACCENT-COLOR);
+    border-radius: 8px;
+    font-size: 1rem;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2));
+    color: #000000;
+    transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+.names-dialog input:focus {
+    outline: none;
+    border-color: #FFCA28;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.3));
+}
+
+.names-dialog button {
+    grid-column: 1 / -1;
+    margin-top: 25px;
+    padding: 25px 70px;
+    background: linear-gradient(145deg, var(--ACCENT-COLOR) 30%, #FFCA28 70%, var(--ACCENT-COLOR) 100%);
+    border: none;
+    border-radius: 10px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: #811313;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s ease, background 0.5s ease, box-shadow 0.3s ease;
+}
+
+.names-dialog button:hover {
+    background: linear-gradient(145deg, #FFCA28 30%, var(--ACCENT-COLOR) 70%, #FFCA28 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+}
+
+@media screen and (max-width: 600px) {
+    .names-dialog {
+        top: 100px;
+    }
+    .names-dialog form {
+        row-gap: 40px;
+        grid-template-columns: 1fr;
+    }
+    .names-dialog p.title {
+        font-size: clamp(1.5rem, 8vw, 2.2rem);
+    }
+    .names-dialog button {
+        padding-inline: 60px;
+        font-size: 1.2rem;
+    }
+}
+
+/* FOOTER */
+
+footer {
+    position: absolute;
+    bottom: 15px;
+    width: 100%;
+    text-align: center;
+    color: var(--TEXT-COLOR);
+    font-size: var(--FOOTER-FS);
+    font-weight: 400;
+    user-select: text;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+    padding: 5px 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}

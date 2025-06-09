@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memory Match Game Test</title>
+  <script type="module">
+    // Import our main.jsx file which loads React and the app
+    import '/src/main.jsx';
+  </script>
+</head>
+<body>
+  <div id="root"></div>
+  <script>
+    // Force navigation to memory game after page loads
+    window.addEventListener('load', () => {
+      if (window.location.pathname !== '/games/memorymatch/play/classic') {
+        window.location.href = '/games/memorymatch/play/classic?price=5';
+      }
+    });
+  </script>
+</body>
+</html> 

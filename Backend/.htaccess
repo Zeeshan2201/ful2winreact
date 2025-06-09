@@ -1,0 +1,20 @@
+RewriteEngine On
+# Handle requests to non-existent files/directories by routing to index.js
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ server.js [L,QSA]
+
+# Set headers for API requests
+<IfModule mod_headers.c>
+    # Allow CORS requests from the frontend origin 
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header set Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    Header set Access-Control-Allow-Credentials "true"
+</IfModule>
+
+# Disable directory listing
+Options -Indexes
+
+# Handle errors
+ErrorDocument 404 /server.js
