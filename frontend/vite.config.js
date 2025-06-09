@@ -4,7 +4,16 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: https://ful2win-u83b.onrender.com
+    port: 5173,
+    proxy: {
+     
+      '/api': {
+        target: 'http://ful2winreact.onrender.com', 
+        changeOrigin: true,
+        secure: false,
+        rewrite: path => path.replace(/^\/api/, '') 
+      }
+    }
   },
   assetsInclude: ['**/*.mp4'],
   publicDir: 'public'
