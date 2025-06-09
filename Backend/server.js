@@ -25,7 +25,7 @@ const server = http.createServer(app);
 const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:5173",
-  "https://ful2win-u83b.onrender.com"
+  "http://ful2win-u83b.onrender.com"
 ];
 
 const corsOptions = {
