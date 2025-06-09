@@ -8,7 +8,7 @@ export default defineConfig({
     proxy: {
      
       '/api': {
-        target: 'http://ful2winreact.onrender.com', 
+        target: 'https://ful2winreact.onrender.com', 
         changeOrigin: true,
         secure: false,
         rewrite: path => path.replace(/^\/api/, '') 
