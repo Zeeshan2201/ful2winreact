@@ -25,6 +25,8 @@ const io = new Server(server, {
   cors: {
     origin: ["http://localhost:3000","http://localhost:5173",  "https://ful2winreact.onrender.com"],  // Your deployed frontend URL
     methods: ["GET", "POST", "PUT"],
+    allowedHeaders: "*",
+    credentials: true,
   },
 });
 
@@ -35,7 +37,10 @@ app.use((req, res, next) => {
   next();
 });
 app.use(cors({
-  origin: ["http://localhost:3000","http://localhost:5173",  "https://ful2winreact.onrender.com"]
+  origin: ["http://localhost:3000","http://localhost:5173",  "https://ful2winreact.onrender.com"],
+  methods: ["GET", "POST", "PUT"],
+  allowedHeaders: "*",
+  credentials: true
 }));
 app.use(express.json());
 
