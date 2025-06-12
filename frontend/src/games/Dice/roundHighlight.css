@@ -1,0 +1,15 @@
+.round-highlight {
+  animation: roundFlash 0.7s;
+  background: linear-gradient(90deg, #facc15 0%, #fbbf24 100%);
+  color: #1e293b !important;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 10px #facc15;
+}
+
+@keyframes roundFlash {
+  0% { background: #facc15; color: #1e293b; transform: scale(1.2); }
+  60% { background: #fbbf24; color: #1e293b; transform: scale(1.1); }
+  100% { background: none; color: inherit; transform: scale(1); }
+}
+
+/* No changes needed. The CSS is already correct and effective for round highlight. */

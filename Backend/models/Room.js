@@ -6,7 +6,7 @@ const RoomSchema = new mongoose.Schema({
   players: [
     {
       userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-      socketId: String
+      socketId:{ type: String, required: true }
     }
   ],
   status: {
