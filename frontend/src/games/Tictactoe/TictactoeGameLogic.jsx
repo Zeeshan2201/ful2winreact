@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import socket from '../../socekt'
 import axios from 'axios'
+import Confetti from "react-confetti";
 /**
  * TictactoeGameLogic - Handles the game logic for Tic Tac Toe
  * This component manages the board state, tracks rounds, and determines the winner
@@ -136,7 +137,7 @@ const TictactoeGameLogic = ({ onGameEnd }) => {
     const initializeGame = async () => {
       try {
         setError(null);
-        const response = await axios.get(`https://ful2winreact.onrender.com/api/tictactoe/room/${roomId}`);
+        const response = await axios.get(`http://localhost:5000/api/tictactoe/room/${roomId}`);
         const game = response.data;
         console.log("getting data")
         if (!game) {
@@ -165,7 +166,7 @@ const TictactoeGameLogic = ({ onGameEnd }) => {
       if (!gameId || !playerId1 || !playerId2) return;
 
       try {
-        const response = await axios.put(`https://ful2winreact.onrender.com/api/tictactoe/assignPlayers/${gameId}`, {
+        const response = await axios.put(`http://localhost:5000/api/tictactoe/assignPlayers/${gameId}`, {
           player1: {
             playerId: playerId1,
             name: 'Player 1',
@@ -226,7 +227,7 @@ const TictactoeGameLogic = ({ onGameEnd }) => {
       setIsUpdating(true);
       setError(null);
 
-      const response = await axios.put(`https://ful2winreact.onrender.com/api/tictactoe/move/${gameId}`, {
+      const response = await axios.put(`http://localhost:5000/api/tictactoe/move/${gameId}`, {
         row,
         col,
         playerId: userId,
@@ -258,6 +259,41 @@ const TictactoeGameLogic = ({ onGameEnd }) => {
     const symbol = isPlayer1 ? playerSymbols.player1 : playerSymbols.player2;
     return `Player ${isPlayer1 ? '1' : '2'} (${symbol})`;
   };
+
+  // Update the WinBurst component
+  const WinBurst = ({ prizeAmount, playerScore, opponentScore }) => (
+    <div className="text-center">
+      <Confetti
+        width={window.innerWidth}
+        height={window.innerHeight}
+        recycle={false}
+        numberOfPieces={200}
+        gravity={0.3}
+      />
+      <h2 className="text-3xl font-bold text-green-400 mb-2">Congratulations! You Won! 🎉</h2>
+      <h3 className="text-xl text-green-300 mb-4">+₹{prizeAmount}</h3>
+      <p className="text-lg text-white/90 mb-2">Final Score: {playerScore} - {opponentScore}</p>
+      <p className="text-sm text-white/80">Great game! Would you like to play again?</p>
+    </div>
+  );
+
+  // Update the TieBurst component
+  const TieBurst = ({ score }) => (
+    <div className="text-center">
+      <h2 className="text-3xl font-bold text-yellow-400 mb-2">It's a Tie! 🤝</h2>
+      <p className="text-lg text-white/90 mb-2">Final Score: {score} - {score}</p>
+      <p className="text-sm text-white/80">So close! Want to break the tie?</p>
+    </div>
+  );
+
+  // Update the LossBurst component
+  const LossBurst = ({ playerScore, opponentScore }) => (
+    <div className="text-center">
+      <h2 className="text-3xl font-bold text-red-400 mb-2">Game Over - You Lost! 😔</h2>
+      <p className="text-lg text-white/90 mb-2">Final Score: {playerScore} - {opponentScore}</p>
+      <p className="text-sm text-white/80">Better luck next time! Try again?</p>
+    </div>
+  );
 
   return (
        <div className="flex relative w-full flex-col items-center justify-center h-full bg-cover bg-center" style={{ backgroundImage: "url('/images/games/tictactoe-logo.jpg')" }}>

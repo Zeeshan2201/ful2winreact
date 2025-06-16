@@ -105,41 +105,90 @@ const RoundResultDisplay = ({ result, roundNumber }) => (
     exit={{ opacity: 0, scale: 0.8 }}
     className="fixed inset-0 bg-black/50 flex items-center justify-center z-30"
   >
-    <div className="bg-white/20 backdrop-blur-lg rounded-2xl p-8 text-center border border-white/30">
-      <h3 className="text-2xl font-bold mb-2">Round {roundNumber} Result</h3>
-      <h3 className="text-3xl font-bold mb-4">
+    <motion.div 
+      initial={{ y: 20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      className="bg-white/20 backdrop-blur-lg rounded-2xl p-8 text-center border border-white/30"
+    >
+      <motion.h3 
+        initial={{ y: -10, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2 }}
+        className="text-2xl font-bold mb-2"
+      >
+        Round {roundNumber} Result
+      </motion.h3>
+      <motion.h3 
+        initial={{ y: -10, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.4 }}
+        className="text-3xl font-bold mb-4"
+      >
         {result.winner === "You" && (
-          <span className="text-green-400">You Won This Round! 🎉</span>
+          <span className="text-green-400 flex items-center justify-center gap-2">
+            You Won This Round! 🎉
+          </span>
         )}
         {result.winner === "Opponent" && (
-          <span className="text-red-400">Opponent Won This Round 😔</span>
+          <span className="text-red-400 flex items-center justify-center gap-2">
+            Opponent Won This Round 😔
+          </span>
         )}
         {result.winner === "Draw" && (
-          <span className="text-yellow-400">It's a Draw! 🤝</span>
+          <span className="text-yellow-400 flex items-center justify-center gap-2">
+            It's a Draw! 🤝
+          </span>
         )}
-      </h3>
-      <div className="flex justify-center gap-8 mb-4">
+      </motion.h3>
+      <motion.div 
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.6 }}
+        className="flex justify-center gap-8 mb-4"
+      >
         <div className="text-center">
           <p className="text-sm text-white/80">Your Roll</p>
-          <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center mt-2">
+          <motion.div 
+            initial={{ rotate: 0 }}
+            animate={{ rotate: 360 }}
+            transition={{ duration: 0.5, delay: 0.8 }}
+            className="w-16 h-16 bg-white rounded-lg flex items-center justify-center mt-2"
+          >
             <DiceDots value={result.playerRoll} size="small" />
-          </div>
+          </motion.div>
           <p className="mt-2 font-bold">{result.playerRoll}</p>
         </div>
         <div className="text-center">
           <p className="text-sm text-white/80">Opponent's Roll</p>
-          <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center mt-2">
+          <motion.div 
+            initial={{ rotate: 0 }}
+            animate={{ rotate: 360 }}
+            transition={{ duration: 0.5, delay: 1 }}
+            className="w-16 h-16 bg-white rounded-lg flex items-center justify-center mt-2"
+          >
             <DiceDots value={result.opponentRoll} size="small" />
-          </div>
+          </motion.div>
           <p className="mt-2 font-bold">{result.opponentRoll}</p>
         </div>
-      </div>
-      <div className="text-sm text-white/80">
+      </motion.div>
+      <motion.div 
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 1.2 }}
+        className="text-sm text-white/80"
+      >
         <p>Current Score</p>
         <p className="font-bold">You: {result.currentScore.player} - Opponent: {result.currentScore.opponent}</p>
-      </div>
-      <p className="text-white/80 mt-4">Next round starting in 3 seconds...</p>
-    </div>
+      </motion.div>
+      <motion.p 
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 1.4 }}
+        className="text-white/80 mt-4"
+      >
+        Next round starting in 3 seconds...
+      </motion.p>
+    </motion.div>
   </motion.div>
 );
 
@@ -230,6 +279,28 @@ export default function DiceGameLogic() {
   const retryCountRef = useRef(0);
 
   const BASE_URL = "http://localhost:5000";
+
+  const [gameState, setGameState] = useState({
+    isInitialized: false,
+    lastUpdate: null,
+    connectionStatus: 'disconnected',
+    errorCount: 0,
+    roundTransitionInProgress: false
+  });
+
+  // Add debug logging function
+  const logGameState = (message, data = {}) => {
+    console.log(`[Dice Game Debug] ${message}`, {
+      ...data,
+      gameState,
+      isPlayerTurn,
+      isRolling,
+      hasRolled,
+      roundNumber,
+      timeLeft,
+      status
+    });
+  };
 
   // Initialize socket with userId
   useEffect(() => {
@@ -460,14 +531,53 @@ export default function DiceGameLogic() {
     }
   }, [roomId, isGameInitialized]);
 
-  // Socket event handler for round updates
+  // Enhanced round transition handling
+  const startNextRound = () => {
+    logGameState('Starting next round');
+    if (gameState.roundTransitionInProgress) {
+      logGameState('Round transition already in progress');
+      return;
+    }
+
+    setGameState(prev => ({ ...prev, roundTransitionInProgress: true }));
+    
+    try {
+      // Reset all game states for the new round
+      setPlayer1Roll(null);
+      setPlayer2Roll(null);
+      setLastRolledDice(null);
+      setHasRolled(false);
+      setIsRolling(false);
+      setIsPlayerTurn(isPlayer1);
+      setTurnMessage(isPlayer1 ? "Your turn!" : "Opponent's turn...");
+      setShowRoundResult(false);
+      setRoundResult(null);
+      setTimeLeft(10);
+      
+      // Update round number after state reset
+      setRoundNumber(prev => prev + 1);
+      
+      logGameState('Round transition completed');
+    } catch (error) {
+      logGameState('Error during round transition', { error: error.message });
+      setError('Failed to start next round. Please try again.');
+    } finally {
+      setGameState(prev => ({ ...prev, roundTransitionInProgress: false }));
+    }
+  };
+
+  // Enhanced socket event handler for round updates
   const handleRoundUpdate = useCallback(
     (game) => {
-      console.log("[DEBUG] handleRoundUpdate (diceGameUpdated) fired", game);
-      if (isProcessingUpdate) return;
+      logGameState('Received round update', { game });
+      if (isProcessingUpdate) {
+        logGameState('Update already in progress, skipping');
+        return;
+      }
 
       const now = Date.now();
       if (lastUpdateRef.current && now - lastUpdateRef.current < 1000) {
+        logGameState('Update too soon, skipping');
         return;
       }
 
@@ -475,10 +585,9 @@ export default function DiceGameLogic() {
       setIsProcessingUpdate(true);
 
       try {
-        console.log("Received diceGameUpdated:", game);
         const currentRound = game.rounds?.find((r) => r.roundNumber === game.currentRound);
         if (!currentRound) {
-          console.warn("No current round found");
+          logGameState('No current round found');
           return;
         }
 
@@ -490,19 +599,15 @@ export default function DiceGameLogic() {
           player2: game.player2Score || 0,
         };
         setScores(newScores);
-        console.log("[DEBUG] Updated scores:", newScores);
         setRoundNumber(game.currentRound);
 
-        // Update turn and roll status
-        const playerRoll = isPlayer1 ? currentRound.player1Roll : currentRound.player2Roll;
-        setHasRolled(!!playerRoll);
-        setIsPlayerTurn(isPlayer1 ? !currentRound.player1Roll : !currentRound.player2Roll);
+        // Improved turn management
+        const isCurrentPlayerTurn = isPlayer1 ? !currentRound.player1Roll : !currentRound.player2Roll;
+        setIsPlayerTurn(isCurrentPlayerTurn);
+        setHasRolled(isPlayer1 ? !!currentRound.player1Roll : !!currentRound.player2Roll);
 
         // Update turn message
-        if (isPlayer1 && !currentRound.player1Roll) {
-          setTurnMessage("Your turn!");
-          setTimeLeft(10);
-        } else if (!isPlayer1 && !currentRound.player2Roll) {
+        if (isCurrentPlayerTurn) {
           setTurnMessage("Your turn!");
           setTimeLeft(10);
         } else {
@@ -549,14 +654,17 @@ export default function DiceGameLogic() {
               return updatedHistory;
             });
 
+            // Wait for round result display before starting next round
             setTimeout(() => {
               setShowRoundResult(false);
               setRoundResult(null);
 
               // Continue with next round or game end
               if (game.currentRound < 5) {
+                logGameState('Starting next round after result');
                 startNextRound();
               } else {
+                logGameState('Game complete, updating winner');
                 updateGameWinner();
               }
             }, 3000);
@@ -578,7 +686,7 @@ export default function DiceGameLogic() {
           }
         }
       } catch (err) {
-        console.error("Error processing round update:", err.message);
+        logGameState('Error processing round update', { error: err.message });
         setError("Failed to process game update");
       } finally {
         setIsProcessingUpdate(false);
@@ -586,6 +694,20 @@ export default function DiceGameLogic() {
     },
     [isPlayer1, gameId, userId, balance, prizeAmount, parsedUserData, gameOver, showRoundResult]
   );
+
+  // Add round transition validation
+  useEffect(() => {
+    const validateRoundTransition = () => {
+      if (gameState.roundTransitionInProgress && Date.now() - gameState.lastUpdate > 5000) {
+        logGameState('Round transition stuck - resetting state');
+        setGameState(prev => ({ ...prev, roundTransitionInProgress: false }));
+        setError('Round transition failed. Please try again.');
+      }
+    };
+
+    const interval = setInterval(validateRoundTransition, 1000);
+    return () => clearInterval(interval);
+  }, [gameState]);
 
   // Socket event listeners for game updates
   useEffect(() => {
@@ -678,6 +800,7 @@ export default function DiceGameLogic() {
 
     setIsRolling(true);
     setHasRolled(true);
+    setError(null); // Clear any previous errors
 
     const rollInterval = setInterval(() => {
       setLastRolledDice(Math.floor(Math.random() * 6) + 1);
@@ -687,10 +810,33 @@ export default function DiceGameLogic() {
       setIsProcessingUpdate(true);
       const finalRoll = Math.floor(Math.random() * 6) + 1;
 
-      await axios.put(`${BASE_URL}/api/dicegame/move/${gameId}`, {
-        playerId: userId,
-        roll: finalRoll,
-      });
+      // Add retry logic for the API call
+      let retryCount = 0;
+      const maxRetries = 3;
+      let success = false;
+
+      while (retryCount < maxRetries && !success) {
+        try {
+          const response = await axios.put(`${BASE_URL}/api/dicegame/move/${gameId}`, {
+            playerId: userId,
+            roll: finalRoll,
+          }, {
+            timeout: 5000 // 5 second timeout
+          });
+
+          if (response.data) {
+            success = true;
+            console.log("Roll successful:", response.data);
+          }
+        } catch (error) {
+          retryCount++;
+          if (retryCount === maxRetries) {
+            throw error;
+          }
+          // Wait before retrying
+          await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+        }
+      }
 
       clearInterval(rollInterval);
       setLastRolledDice(finalRoll);
@@ -704,30 +850,27 @@ export default function DiceGameLogic() {
       setIsPlayerTurn(false);
       setTurnMessage("Waiting for opponent...");
       setIsRolling(false);
+
+      // Force update game state after successful roll
+      try {
+        const gameResponse = await axios.get(`${BASE_URL}/api/dicegame/room/${roomId}`);
+        if (gameResponse.data) {
+          handleRoundUpdate(gameResponse.data);
+        }
+      } catch (error) {
+        console.error("Error fetching game state after roll:", error);
+      }
+
     } catch (error) {
       console.error("Error updating roll:", error.response?.data || error.message);
       setError(`Failed to update roll: ${error.response?.data?.error || error.message}`);
       clearInterval(rollInterval);
       setIsRolling(false);
       setHasRolled(false);
+      setIsPlayerTurn(true); // Reset turn if roll failed
     } finally {
       setIsProcessingUpdate(false);
     }
-  };
-
-  const startNextRound = () => {
-    console.log("[DEBUG] startNextRound called");
-    setPlayer1Roll(null);
-    setPlayer2Roll(null);
-    setLastRolledDice(null);
-    setRoundNumber((prev) => prev + 1);
-    setTimeLeft(10);
-    setHasRolled(false);
-    setIsRolling(false);
-    setIsPlayerTurn(isPlayer1);
-    setTurnMessage(isPlayer1 ? "Your turn!" : "Opponent's turn...");
-    setShowRoundResult(false);
-    setRoundResult(null);
   };
 
   const updateGameWinner = async () => {
@@ -1101,5 +1244,6 @@ export default function DiceGameLogic() {
     </div>
   );
 }
+
 
 
