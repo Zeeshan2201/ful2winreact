@@ -24,9 +24,8 @@ const PrivateRoute = ({ children }) => {
         return;
       }
 
-      try {
-        const response = await axios.post(
-          "https://ful2winreact.onrender.com/api/auth/verify-token",
+      try {        const response = await axios.post(
+          "http://localhost:5000/api/auth/verify-token",
           { userId: user._id },
           {
             headers: {

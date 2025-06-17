@@ -73,9 +73,7 @@ const initialGameOptions = [
   { id: 5, name: "Shooter" },
 ]
 
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? "https://ful2winreact.onrender.com"
-  : "http://localhost:5000"; // Use production URL in production, local in development
+const API_BASE_URL = "http://localhost:5000"; // Force local development
 
 export default function useCommunityData() {
   const [users, setUsers] = useState([]) // Initialize with empty array
