@@ -56,7 +56,7 @@ router.put('/move/:gameId', async (req, res) => {
   try {
     const { playerId, move, roundNumber } = req.body;
     const game = await RockPaperGame.findById(req.params.gameId);
-    
+
     if (!game) {
       return res.status(404).json({ error: 'Game not found' });
     }
@@ -70,52 +70,105 @@ router.put('/move/:gameId', async (req, res) => {
       return res.status(400).json({ error: 'Not your turn' });
     }
 
-    // Find the current round
-    const currentRound = game.rounds.find(r => r.roundNumber === roundNumber);
-    if (!currentRound) {
-      return res.status(400).json({ error: 'Invalid round number' });
+    // Find and update round
+    const round = game.rounds.find((r) => r.roundNumber === roundNumber);
+    if (!round) {
+      return res.status(400).json({ error: 'Invalid round' });
     }
 
-    // Update the appropriate player's move
+    // Update move and turn
     if (isPlayer1) {
-      currentRound.player1Move = move;
+      round.player1Move = move;
       game.currentPlayerTurn = 'player2';
-    } else if (isPlayer2) {
-      currentRound.player2Move = move;
-      game.currentPlayerTurn = 'player1';
     } else {
-      return res.status(400).json({ error: 'Invalid player' });
-    }
-
-    // Check if both players have made their moves
-    if (currentRound.player1Move && currentRound.player2Move) {
-      // Determine round winner
-      const winner = determineRoundWinner(currentRound.player1Move, currentRound.player2Move);
-      currentRound.winner = winner;
-      currentRound.status = 'completed';
-
-      // Update scores
-      if (winner === game.player1.playerId) {
-        game.player1Score += 1;
-      } else if (winner === game.player2.playerId) {
-        game.player2Score += 1;
-      }
-
-      // Check if game is over
-      if (roundNumber === 3) {
-        game.status = 'finished';
-        game.winner = game.player1Score > game.player2Score ? game.player1.playerId :
-                     game.player2Score > game.player1Score ? game.player2.playerId : null;
-      } else {
-        game.currentRound = roundNumber + 1;
-      }
+      round.player2Move = move;
+      game.currentPlayerTurn = 'player1';
     }
 
     await game.save();
-    req.io.emit('roundUpdated', game);
-    res.status(200).json(game);
+
+    // Emit turn update
+    req.io.to(game.roomId).emit('turnUpdated', {
+      currentPlayerTurn: game.currentPlayerTurn,
+      gameId: game._id,
+    });
+
+    // Evaluate round if both moves are made
+    if (round.player1Move && round.player2Move) {
+      // Determine round winner
+      let roundWinner = null;
+      let resultMessage = `Round ${round.roundNumber}: `;
+      if (round.player1Move === round.player2Move) {
+        roundWinner = null;
+        resultMessage += 'Tie';
+      } else if (
+        (round.player1Move === 'rock' && round.player2Move === 'scissors') ||
+        (round.player1Move === 'paper' && round.player2Move === 'rock') ||
+        (round.player1Move === 'scissors' && round.player2Move === 'paper')
+      ) {
+        roundWinner = game.player1.playerId;
+        game.player1Score += 1;
+        resultMessage += 'Player 1 wins';
+      } else {
+        roundWinner = game.player2.playerId;
+        game.player2Score += 1;
+        resultMessage += 'Player 2 wins';
+      }
+
+      round.winner = roundWinner;
+      round.status = 'completed';
+
+      // Update round results
+      game.roundResults = game.roundResults
+        ? [...game.roundResults, resultMessage]
+        : [resultMessage];
+
+      // Check if game is over
+      if (game.currentRound >= 3) {
+        game.status = 'finished';
+        if (game.player1Score > game.player2Score) {
+          game.winner = game.player1.playerId;
+        } else if (game.player2Score > game.player1Score) {
+          game.winner = game.player2.playerId;
+        } else {
+          game.winner = null; // Tie
+        }
+      } else {
+        game.currentRound += 1;
+        const nextRound = game.rounds.find((r) => r.roundNumber === game.currentRound);
+        if (nextRound) {
+          nextRound.player1Move = null;
+          nextRound.player2Move = null;
+          nextRound.winner = null;
+          nextRound.status = 'pending';
+        }
+        game.currentPlayerTurn = 'player1';
+      }
+
+      await game.save();
+
+      // Emit game update
+      req.io.to(game.roomId).emit('roundUpdated', {
+        ...game.toObject(),
+        currentPlayerTurn: game.currentPlayerTurn,
+        roundNumber: game.currentRound,
+        scores: {
+          player1: game.player1Score,
+          player2: game.player2Score,
+        },
+        roundResults: game.roundResults,
+      });
+    }
+
+    res.status(200).json({
+      message: 'Move recorded',
+      game: {
+        ...game.toObject(),
+        currentPlayerTurn: game.currentPlayerTurn,
+      },
+    });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
 

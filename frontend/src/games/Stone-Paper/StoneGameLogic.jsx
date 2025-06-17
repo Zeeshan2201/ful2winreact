@@ -96,7 +96,7 @@ export default function RockPaperScissors() {
 
       try {
         // First, check if a game already exists for this room
-        const response = await axios.get(`https://ful2winreact.onrender.com/api/game/room/${roomId}`)
+        const response = await axios.get(`http://localhost:5000/api/game/room/${roomId}`)
         if (response.data) {
           console.log('Existing game found:', response.data)
           setGameId(response.data._id)
@@ -124,7 +124,7 @@ export default function RockPaperScissors() {
         }
 
         console.log('Creating new game with data:', gameData)
-        const createResponse = await axios.post('https://ful2winreact.onrender.com/api/game/create', gameData)
+        const createResponse = await axios.post('http://localhost:5000/api/game/create', gameData)
         console.log('Game created successfully:', createResponse.data)
         
         setGameId(createResponse.data._id)
@@ -147,7 +147,7 @@ export default function RockPaperScissors() {
       if (!gameId) return;
       
       try {
-        const response = await axios.get(`https://ful2winreact.onrender.com/api/game/current-turn/${gameId}`);
+        const response = await axios.get(`http://localhost:5000/api/game/current-turn/${gameId}`);
         const { currentPlayerTurn } = response.data;
         setCurrentPlayerTurn(currentPlayerTurn);
         
@@ -245,7 +245,7 @@ export default function RockPaperScissors() {
   useEffect(() => {
     const fetchGame = async () => {
       try {
-        const response = await axios.get(`https://ful2winreact.onrender.com/api/game/room/${roomId}`);
+        const response = await axios.get(`http://localhost:5000/api/game/room/${roomId}`);
         const gameData = response.data;
         setGame(gameData);
 
@@ -287,49 +287,52 @@ useEffect(() => {
 }, [roundNumber, gameOver]);
 
   // Update handleChoice to check current turn
-  const handleChoice = async (choice) => {
-    if (!gameId || !isPlayerTurn || isProcessingUpdate) {
-      console.log('Cannot make move:', { gameId, isPlayerTurn, isProcessingUpdate });
-      return;
-    }
-
-    try {
-      setIsProcessingUpdate(true);
-
-      // Send move update
-      const response = await axios.put(`https://ful2winreact.onrender.com/api/game/move/${gameId}`, {
-        playerId: userId,
-        move: choice,
-        roundNumber: roundNumber
-      });
-
-      // Update local state
-      if (isPlayer1) {
-        setPlayer1Choice(choice);
-      } else {
-        setPlayer2Choice(choice);
+  const handleChoice = useCallback(
+    async (choice) => {
+      if (!gameId || !isPlayerTurn || isProcessingUpdate) {
+        console.log('Cannot make move:', { gameId, isPlayerTurn, isProcessingUpdate });
+        return;
       }
 
-      setIsPlayerTurn(false);
-      clearInterval(timerRef.current);
+      try {
+        setIsProcessingUpdate(true);
 
-      console.log('Move updated successfully:', response.data);
+        // Send move update
+        const response = await axios.put(`http://localhost:5000/api/game/move/${gameId}`, {
+          playerId: userId,
+          move: choice,
+          roundNumber: roundNumber
+        });
 
-      // Check if both players have made their moves
-      const updatedGame = await axios.get(`https://ful2winreact.onrender.com/api/game/room/${roomId}`);
-      const currentRound = updatedGame.data.rounds.find(r => r.roundNumber === roundNumber);
-      
-      if (currentRound && currentRound.player1Move && currentRound.player2Move) {
-        // Both players have moved, evaluate the round
-        evaluateRound(currentRound.player1Move, currentRound.player2Move);
+        // Update local state
+        if (isPlayer1) {
+          setPlayer1Choice(choice);
+        } else {
+          setPlayer2Choice(choice);
+        }
+
+        setIsPlayerTurn(false);
+        clearInterval(timerRef.current);
+
+        console.log('Move updated successfully:', response.data);
+
+        // Check if both players have made their moves
+        const updatedGame = await axios.get(`http://localhost:5000/api/game/room/${roomId}`);
+        const currentRound = updatedGame.data.rounds.find(r => r.roundNumber === roundNumber);
+        
+        if (currentRound && currentRound.player1Move && currentRound.player2Move) {
+          // Both players have moved, evaluate the round
+          evaluateRound(currentRound.player1Move, currentRound.player2Move);
+        }
+
+      } catch (error) {
+        console.error('Error updating move:', error);
+      } finally {
+        setIsProcessingUpdate(false);
       }
-
-    } catch (error) {
-      console.error('Error updating move:', error);
-    } finally {
-      setIsProcessingUpdate(false);
-    }
-  };
+    },
+    [gameId, isPlayerTurn, isProcessingUpdate, roundNumber, userId]
+  );
 
   // Determine winner of the round
   const evaluateRound = async (p1Choice, p2Choice) => {
@@ -357,7 +360,7 @@ useEffect(() => {
       }
 
       // Get current game state
-      const currentGame = await axios.get(`https://ful2winreact.onrender.com/api/game/room/${roomId}`)
+      const currentGame = await axios.get(`http://localhost:5000/api/game/room/${roomId}`)
       const currentRounds = currentGame.data.rounds || []
       const currentRound = currentRounds.find(r => r.round === roundNumber) || { round: roundNumber }
 
@@ -370,7 +373,7 @@ useEffect(() => {
         winner: roundWinner
       }
 
-      await axios.put(`https://ful2winreact.onrender.com/api/game/round/${gameId}`, {
+      await axios.put(`http://localhost:5000/api/game/round/${gameId}`, {
         round: updatedRound
       })
 
@@ -383,17 +386,18 @@ useEffect(() => {
         setGameOver(true)
         
 // Example usage:
-        setWinner("player2")
+       // setWinner("player2")
         // setWinner(gameWinner === userId ? "player1" : "player2")
-
+        const winnerId = gameWinner === "player1" ? playerId1 : 
+        gameWinner === "player2" ? playerId2 : null;
         // Update game status and room status
-        await axios.put(`https://ful2winreact.onrender.com/api/game/round/${gameId}`, {
+        await axios.put(`http://localhost:5000/api/game/round/${gameId}`, {
           status: 'finished',
           winner: gameWinner
         })
 
         // Update room status
-        await axios.put(`https://ful2winreact.onrender.com/api/room/${roomId}/status`, {
+        await axios.put(`http://localhost:5000/api/room/${roomId}/status`, {
           status: 'finished',
           winner: gameWinner
         })
@@ -422,7 +426,7 @@ useEffect(() => {
   }
 async function updateGameWinner(roomId) {
   try {
-    const response = await fetch(`https://ful2winreact.onrender.com/api/game/update-winner/${roomId}`, {
+    const response = await fetch(`http://localhost:5000/api/game/update-winner/${roomId}`, {
       method: 'PUT'
     });
 
@@ -458,7 +462,7 @@ if (data.player1Score > data.player2Score) {
 }
 
   // Reset the game
-  const resetGame = () => {
+  const resetGame = useCallback(() => {
     setPlayer1Choice(null)
     setPlayer2Choice(null)
     setRoundResult(null)
@@ -468,7 +472,7 @@ if (data.player1Score > data.player2Score) {
     setIsPlayerTurn(false)
     setGameOver(false)
     setWinner(null)
-  }
+  }, [])
 
   // Get result message
   const getResultMessage = () => {
