@@ -6,15 +6,13 @@ import { useNavigate } from "react-router-dom"
 export default function GameCatalog() {
   const [activeTab, setActiveTab] = useState("All")
   const navigate = useNavigate()
-
   const games = {
-    All: ["TicTacToe","StonePaper", "Ludo", "Carrom", "Chess", "BGMI", "Freefire","Uno", "CoinFlip", "Dice", "MemoryMatch", "DuckHuntGame"],
+    All: ["TicTacToe","StonePaper", "Ludo", "Carrom", "Chess", "BGMI", "Freefire","Uno", "CoinFlip", "Dice", "MemoryMatch", "DuckHuntGame", "FlappyBall"],
     Board: ["TicTacToe", "Ludo", "Carrom", "Chess", "DuckHuntGame"],
-    Action: ["Freefire", "BGMI"],
+    Action: ["Freefire", "BGMI", "FlappyBall"],
     Card: ["Uno"],
     Casino: ["StonePaper", "CoinFlip", "Dice", "MemoryMatch"]
   }
-
   const gameLinks = {
     TicTacToe: "/games/tictactoe",
     Uno: "/games/uno",
@@ -28,15 +26,15 @@ export default function GameCatalog() {
     MemoryMatch: "/games/memorymatch",
     StonePaper: "/games/stonepaper",
     DuckHuntGame:"/games/DuckHuntGame",
+    FlappyBall: "/games/flappyball",
   }
-
   // Track which games have actual implementations
   const implementedGames = [
     "TicTacToe",
-    "CoinFlip",
-    "Dice",
+    "CoinFlip",    "Dice",
     "MemoryMatch",
-    "StonePaper"
+    "StonePaper",
+    "FlappyBall"
   ]
 
   const gameImages = {
@@ -52,8 +50,8 @@ export default function GameCatalog() {
     MemoryMatch: "/memorymatch.png",
     StonePaper: "/stonepaper.jpg",
     DuckHuntGame:"/DuckHuntGame.jpg",
+    FlappyBall: "/flappyball.svg",
   }
-
   const gameCategories = {
     TicTacToe: "Board",
     Uno: "Card",
@@ -67,6 +65,7 @@ export default function GameCatalog() {
     MemoryMatch: "Casino",
     StonePaper: "Casino",
     DuckHuntGame: "Board",
+    FlappyBall: "Action",
   }
 
   const handleGameClick = (game) => {

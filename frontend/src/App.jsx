@@ -43,6 +43,7 @@ import TictactoeGameLogic from './games/Tictactoe/TictactoeGameLogic';
 import PrivateRoute from './components/PrivateRoute';
 import NotFound from './pages/NotFound';
 import DuckHuntGame from './games/DuckHunt/logic';
+import Flappyball from './games/Flappyball/Flappyball';
 
 function HomePage() {
   const [showSplash, setShowSplash] = useState(true);
@@ -299,22 +300,28 @@ function App() {
             gameImage="/coinflip.jpg"
             gameCategory="Casino"
           /></PrivateRoute>
-        } />
-        <Route path="/games/DuckHuntGame" element={<PrivateRoute>
+        } />        <Route path="/games/DuckHuntGame" element={<PrivateRoute>
           <GameDashboard 
             gameTitle="DuckHuntGame" 
             gameImage="/DuckHuntGame.jpg"
             gameCategory="Board"
           /></PrivateRoute>
         } />
+        <Route path="/games/flappyball" element={<PrivateRoute>
+          <GameDashboard 
+            gameTitle="FlappyBall" 
+            gameImage="/flappyball.svg"
+            gameCategory="Action"
+          /></PrivateRoute>
+        } />
         
-        {/* Direct game routes (accessible after selecting mode in dashboard) */}
-        <Route path="/games/tictactoe/play" element={<PrivateRoute><TicTacToe /></PrivateRoute>} />
+        {/* Direct game routes (accessible after selecting mode in dashboard) */}        <Route path="/games/tictactoe/play" element={<PrivateRoute><TicTacToe /></PrivateRoute>} />
         <Route path="/games/stonepaper/play" element={<PrivateRoute><SPS /></PrivateRoute>} />
         <Route path="/games/memorymatch/play" element={<PrivateRoute><MemoryMatchGame /></PrivateRoute>} />
         <Route path="/games/dice/play" element={<PrivateRoute><DiceDuel /></PrivateRoute>} />
         <Route path="/games/coinflip/play" element={<PrivateRoute><CoinFlipBet /></PrivateRoute>} />
         <Route path="/games/DuckHuntGame/play" element={<PrivateRoute><DuckHuntGame /></PrivateRoute>} />
+        <Route path="/games/flappyball/play" element={<PrivateRoute><Flappyball /></PrivateRoute>} />
         
         {/* Coming Soon Games */}
         <Route path="/games/ludo" element={<PrivateRoute><ComingSoonPage /></PrivateRoute>} />
@@ -364,10 +371,13 @@ function App() {
         <Route 
           path="/games/stonepaper/*" 
           element={<PrivateRoute><GameModeRouter onBack={() => window.history.back()} gameType="stonepaper" /></PrivateRoute>} 
-        />
-        <Route 
+        />        <Route 
           path="/games/DuckHuntGame/*" 
           element={<PrivateRoute><GameModeRouter onBack={() => window.history.back()} gameType="DuckHuntGame" /></PrivateRoute>} 
+        />
+        <Route 
+          path="/games/flappyball/*" 
+          element={<PrivateRoute><GameModeRouter onBack={() => window.history.back()} gameType="flappyball" /></PrivateRoute>} 
         />
         <Route 
           path="/games/bgmi/*" 

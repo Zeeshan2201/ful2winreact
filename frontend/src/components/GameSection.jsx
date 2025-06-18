@@ -7,15 +7,13 @@ import CarromDashboard from "./CarromDashboard"
 export default function GameSection() {
   const [activeTab, setActiveTab] = useState("All")
   const [activeDashboard, setActiveDashboard] = useState(null)
-
   const games = {
-    All: ["Ludo", "Carrom", "Chess", "BGMI", "Freefire", "TicTacToe", "Uno", "CoinFlip", "Dice", "MemoryMatch", "StonePaper","DuckHuntGame"],
+    All: ["Ludo", "Carrom", "Chess", "BGMI", "Freefire", "TicTacToe", "Uno", "CoinFlip", "Dice", "MemoryMatch", "StonePaper","DuckHuntGame", "FlappyBall"],
     Board: ["Ludo", "Carrom", "Chess", "TicTacToe", "DuckHuntGame"],
-    Action: ["BGMI", "Freefire"],
+    Action: ["BGMI", "Freefire", "FlappyBall"],
     Card: ["Uno"],
     Casino: ["CoinFlip", "Dice", "StonePaper"]
   }
-
   const gameLinks = {
     TicTacToe: "/games/tictactoe",
     Uno: "/games/uno",
@@ -26,9 +24,9 @@ export default function GameSection() {
     Freefire: "/games/freefire",
     CoinFlip: "/games/coinFlip",
     Dice: "/games/dice",
-    MemoryMatch: "/games/memorymatch",
-    StonePaper:"/games/stonePaper",
+    MemoryMatch: "/games/memorymatch",    StonePaper:"/games/stonePaper",
     DuckHuntGame:"/games/DuckHuntGame",
+    FlappyBall: "/games/flappyball",
   }
 
   const gameImages = {
@@ -43,8 +41,8 @@ export default function GameSection() {
     Dice: "/dice.png",
     MemoryMatch: "/memorymatch.png",
     DuckHuntGame:"/DuckHuntGame.jpg",
+    FlappyBall: "/flappyball.svg",
   }
-
   const gameCategories = {
     TicTacToe: "Board",
     RockPaperScissor: "Casino",
@@ -59,6 +57,7 @@ export default function GameSection() {
     MemoryMatch: "Casino",
     StonePaper: "Casino",
     DuckHuntGame: "Board",
+    FlappyBall: "Action",
   }
 
   // Default entry fees for all games (can be customized per game if needed)

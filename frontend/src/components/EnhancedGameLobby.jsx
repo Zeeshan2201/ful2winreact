@@ -11,6 +11,7 @@ import CoinflipGameLogic from "../games/Coinflip/CoinflipGameLogic";
 import DiceGameLogic from "../games/Dice/DiceGameLogic";
 import StoneGameLogic from "../games/Stone-Paper/StoneGameLogic";
 import DuckHuntGame from "../games/DuckHunt/logic";
+import FlappyBallGameLogic from "../games/Flappyball/FlappyBallGameLogic";
 import socket from '../socekt';
 const EnhancedGameLobby = ({
   entryFee = 10,
@@ -364,15 +365,15 @@ localStorage.setItem('prizeAmount', prizeAmount.toString());
     
     // Try to dynamically import and render game component based on gameId
     if(localStorage.getItem("match_found")){
-    try {
-      // Map of game IDs to their corresponding logic components
+    try {      // Map of game IDs to their corresponding logic components
       const gameComponents = {
         "memorymatch": MemoryMatchGameLogic,
         "tictactoe": TictactoeGameLogic,
         "coinflip": CoinflipGameLogic,
         "dice": DiceGameLogic,
         "stonepaper": StoneGameLogic,
-        "duckhuntgame": DuckHuntGame
+        "duckhuntgame": DuckHuntGame,
+        "flappyball": FlappyBallGameLogic
       };
       
       // Get the component from the map or use a fallback
