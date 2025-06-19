@@ -9,6 +9,7 @@ const gameRoutes = require('./routes/gameRoutes');
 const postRoutes = require('./routes/postRoutes');
 const authRoutes = require('./routes/auth');
 const protected = require('./routes/protected');
+const fluppy = require('./routes/fluppy');
 const MatchmakingQueue = require('./models/MatchmakingQueue');
 const Room = require('./models/Room');
 const chatRoutes = require('./routes/chat');
@@ -56,6 +57,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/tictactoe', ticTacToeGameRoutes);
+app.use('/api/fluppy', fluppy);
 app.use('/api/game', rockPaperGameRoutes);
 app.use('/api/protected', protected); // secured routes
 app.use('/api/duckhunt', DuckHunt); // secured routes
