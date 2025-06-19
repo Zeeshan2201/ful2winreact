@@ -7,64 +7,62 @@ export default function GameCatalog() {
   const [activeTab, setActiveTab] = useState("All")
   const navigate = useNavigate()
   const games = {
-    All: ["TicTacToe","StonePaper", "Ludo", "Carrom", "Chess", "BGMI", "Freefire","Uno", "CoinFlip", "Dice", "MemoryMatch", "DuckHuntGame", "FlappyBall"],
-    Board: ["TicTacToe", "Ludo", "Carrom", "Chess", "DuckHuntGame"],
-    Action: ["Freefire", "BGMI", "FlappyBall"],
-    Card: ["Uno"],
-    Casino: ["StonePaper", "CoinFlip", "Dice", "MemoryMatch"]
+    All: ["TicTacToe","StonePaper", /*"Ludo", "Carrom", "Chess", "BGMI", "Freefire","Uno", "CoinFlip",*/ "Dice", /*"MemoryMatch", "DuckHuntGame",*/ "FlappyBall"],
+    Board: ["TicTacToe", /*"Ludo", "Carrom", "Chess", "DuckHuntGame"*/],
+    Action: [/*"Freefire", "BGMI",*/ "FlappyBall"],
+    Card: [/*"Uno"*/],
+    Casino: ["StonePaper", /*"CoinFlip",*/ "Dice", /*"MemoryMatch"*/]
   }
   const gameLinks = {
     TicTacToe: "/games/tictactoe",
-    Uno: "/games/uno",
+    /*Uno: "/games/uno",
     Ludo: "/games/ludo",
     Carrom: "/games/carrom",
     Chess: "/games/chess",
     BGMI: "/games/bgmi",
     Freefire: "/games/freefire",
-    CoinFlip: "/games/coinflip",
+    CoinFlip: "/games/coinflip",*/
     Dice: "/games/dice",
-    MemoryMatch: "/games/memorymatch",
+    /*MemoryMatch: "/games/memorymatch",*/
     StonePaper: "/games/stonepaper",
-    DuckHuntGame:"/games/DuckHuntGame",
+    /*DuckHuntGame:"/games/DuckHuntGame",*/
     FlappyBall: "/games/flappyball",
-  }
-  // Track which games have actual implementations
+  }  // Track which games have actual implementations
   const implementedGames = [
     "TicTacToe",
-    "CoinFlip",    "Dice",
-    "MemoryMatch",
+    /*"CoinFlip",*/    "Dice",
+    /*"MemoryMatch",*/
     "StonePaper",
     "FlappyBall"
   ]
-
   const gameImages = {
     TicTacToe: "/tictactoe.jpg",
-    Uno: "/uno.jpg",
+    /*Uno: "/uno.jpg",
     Ludo: "/ludo.jpeg",
     Carrom: "/carrom.jpg",
     Chess: "/chess.jpg",
     BGMI: "/bgmi.jpg",
     Freefire: "/freefire.jpg",
-    CoinFlip: "/coinflip.jpg",
+    CoinFlip: "/coinflip.jpg",*/
     Dice: "/dice.png",
-    MemoryMatch: "/memorymatch.png",
+    /*MemoryMatch: "/memorymatch.png",*/
     StonePaper: "/stonepaper.jpg",
-    DuckHuntGame:"/DuckHuntGame.jpg",
+    /*DuckHuntGame:"/DuckHuntGame.jpg",*/
     FlappyBall: "/flappyball.svg",
   }
   const gameCategories = {
     TicTacToe: "Board",
-    Uno: "Card",
+    /*Uno: "Card",
     Ludo: "Board",
     Carrom: "Board",
     Chess: "Board",
     BGMI: "Action",
     Freefire: "Action",
-    CoinFlip: "Casino",
+    CoinFlip: "Casino",*/
     Dice: "Casino",
-    MemoryMatch: "Casino",
+    /*MemoryMatch: "Casino",*/
     StonePaper: "Casino",
-    DuckHuntGame: "Board",
+    /*DuckHuntGame: "Board",*/
     FlappyBall: "Action",
   }
 

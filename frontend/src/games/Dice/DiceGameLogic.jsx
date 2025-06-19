@@ -87,7 +87,7 @@ const findMatch = () => {
 };
 
 const proceedWithMatchmaking = () => {
-  setBalance((prev) => prev - entryFee);
+  // Don't deduct balance here - wait for match_found
   setError(null);
   resetGame();
   socket.emit("join_matchmaking", {
@@ -263,8 +263,8 @@ export default function DiceGameLogic() {
   const [entryFee] = useState(10);
   const [prizeAmount] = useState(15);
   const [balance, setBalance] = useState(parsedUserData?.Balance || 100);
-  const [roundHistory, setRoundHistory] = useState([]);
-  const [status, setStatus] = useState("waiting");
+  const [roundHistory, setRoundHistory] = useState([]);  const [status, setStatus] = useState("waiting");
+  const [matchingTimeLeft, setMatchingTimeLeft] = useState(15);
   const [turnMessage, setTurnMessage] = useState("");
   const [showRoundResult, setShowRoundResult] = useState(false);
   const [roundResult, setRoundResult] = useState(null);
@@ -322,9 +322,15 @@ export default function DiceGameLogic() {
 
   // Prevent back navigation
   useEffect(() => {
-    window.history.pushState(null, null, window.location.href);
-    const handlePopstate = () => {
+    window.history.pushState(null, null, window.location.href);    const handlePopstate = () => {
       window.history.pushState(null, null, window.location.href);
+      
+      // If user is in matching state, cancel matchmaking and refund
+      if (status === "matching") {
+        console.log("User going back while matching - cancelling matchmaking");
+        socket.emit('leave_matchmaking', { userId, gameId: "dice", entryAmount: entryFee });
+      }
+      
       setError("Game session ended. Please start a new match.");
       if (!hasLeftRoomsRef.current) {
         socket.emit("leave_all_rooms");
@@ -337,9 +343,10 @@ export default function DiceGameLogic() {
   }, []);
 
   // Handle matchmaking events
-  useEffect(() => {
-    const onMatchFound = ({ roomId, players }) => {
+  useEffect(() => {    const onMatchFound = ({ roomId, players }) => {
       console.log("Match found:", { roomId, players });
+      // Deduct balance only when match is found
+      setBalance((prev) => prev - entryFee);
       localStorage.setItem("match_found", JSON.stringify({ roomId, players }));
       setRoomId(roomId);
       setStatus("matched");
@@ -347,17 +354,22 @@ export default function DiceGameLogic() {
       initializationAttemptedRef.current = false;
       hasLeftRoomsRef.current = false;
       retryCountRef.current = 0;
-    };
-
-    const onWaitingForOpponent = () => {
+    };    const onWaitingForOpponent = () => {
       console.log("Waiting for opponent");
       setStatus("matching");
+      setMatchingTimeLeft(15);
     };
 
     const onMatchmakingError = ({ message, error }) => {
       console.error("Matchmaking error:", message, error);
       setError(`${message}: ${error?.message || error}`);
       setStatus("waiting");
+    };    const onMatchmakingCancelled = ({ refundAmount }) => {
+      console.log("Matchmaking cancelled, refunding:", refundAmount);
+      // Refund the entry fee
+      setBalance((prev) => prev + refundAmount);
+      setStatus("waiting");
+      setMatchingTimeLeft(15);
     };
 
     const onConnect = () => {
@@ -371,11 +383,10 @@ export default function DiceGameLogic() {
       console.error("Socket connection error:", err.message);
       setError("Failed to connect to server. Please try again.");
       setStatus("waiting");
-    };
-
-    socket.on("match_found", onMatchFound);
+    };    socket.on("match_found", onMatchFound);
     socket.on("waiting_for_opponent", onWaitingForOpponent);
     socket.on("matchmaking_error", onMatchmakingError);
+    socket.on("matchmaking_cancelled", onMatchmakingCancelled);
     socket.on("connect", onConnect);
     socket.on("connect_error", onConnectError);
 
@@ -383,10 +394,37 @@ export default function DiceGameLogic() {
       socket.off("match_found", onMatchFound);
       socket.off("waiting_for_opponent", onWaitingForOpponent);
       socket.off("matchmaking_error", onMatchmakingError);
+      socket.off("matchmaking_cancelled", onMatchmakingCancelled);
       socket.off("connect", onConnect);
       socket.off("connect_error", onConnectError);
+    };  }, [status, roomId, userId, entryFee]);
+
+  // Matchmaking timeout effect
+  useEffect(() => {
+    let matchingTimer;
+    
+    if (status === "matching") {
+      setMatchingTimeLeft(15);
+      matchingTimer = setInterval(() => {
+        setMatchingTimeLeft(prev => {
+          if (prev <= 1) {
+            // Timeout reached - cancel matchmaking
+            console.log("Matching timeout - removing from queue");
+            socket.emit('matchmaking_timeout', { userId, gameId: "dice", entryAmount: entryFee });
+            setStatus("waiting");
+            return 15;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    
+    return () => {
+      if (matchingTimer) {
+        clearInterval(matchingTimer);
+      }
     };
-  }, [status, roomId, userId, entryFee]);
+  }, [status, userId, entryFee]);
 
   // Timer effect
   useEffect(() => {
@@ -1034,12 +1072,11 @@ export default function DiceGameLogic() {
         <div className="bg-red-500/90 text-white rounded-lg p-2 mb-2 max-w-xs w-full text-center z-20 text-sm shadow-lg">
           {error}
         </div>
-      )}
-
-      {/* Matchmaking */}
+      )}      {/* Matchmaking */}
       {status === "matching" && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center z-20 mt-10">
           <h2 className="text-lg font-bold mb-2 tracking-wide text-[#38bdf8]">Finding Opponent...</h2>
+          <div className="text-white/80 mb-2">Time remaining: {matchingTimeLeft}s</div>
           <div className="h-1 bg-white/20 mb-4 w-40 mx-auto rounded-full overflow-hidden">
             <motion.div
               animate={{ width: ["0%", "100%"] }}

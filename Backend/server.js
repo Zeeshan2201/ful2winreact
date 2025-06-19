@@ -66,11 +66,14 @@ app.use('/api/coinflip', coinflipGameRoutes); // secured routes
 
 io.on('connection', (socket) => {
   console.log('New client connected:', socket.id);
-
-  socket.on('join_matchmaking', async ({ userId, gameId }) => {
+  socket.on('join_matchmaking', async ({ userId, gameId, entryAmount }) => {
     try {
-      // Check for existing player in queue
-      const opponent = await MatchmakingQueue.findOne({ gameId, userId: { $ne: userId } });
+      // Check for existing player in queue with same gameId, different userId, and SAME entryAmount
+      const opponent = await MatchmakingQueue.findOne({ 
+        gameId, 
+        userId: { $ne: userId },
+        entryAmount: entryAmount // Match players with same entry amount only
+      });
 
       if (opponent) {
         // Match found – remove both from queue
@@ -78,6 +81,7 @@ io.on('connection', (socket) => {
 
         const newRoom = await Room.create({
           gameId,
+          entryAmount, // Store entry amount in room
           players: [
             { userId: opponent.userId, socketId: opponent.socketId },
             { userId, socketId: socket.id }
@@ -86,17 +90,53 @@ io.on('connection', (socket) => {
         });
 
         // Notify both players
-        socket.emit('match_found', { roomId: newRoom._id, players: newRoom.players });
-        io.to(opponent.socketId).emit('match_found', { roomId: newRoom._id, players: newRoom.players });
+        socket.emit('match_found', { roomId: newRoom._id, players: newRoom.players, entryAmount });
+        io.to(opponent.socketId).emit('match_found', { roomId: newRoom._id, players: newRoom.players, entryAmount });
 
       } else {
-        // No opponent found yet, add to queue
-        await MatchmakingQueue.create({ userId, gameId, socketId: socket.id });
+        // No opponent found yet, add to queue with entryAmount
+        await MatchmakingQueue.create({ userId, gameId, entryAmount, socketId: socket.id });
         socket.emit('waiting_for_opponent');
       }
     } catch (err) {
       console.error('Matchmaking error:', err);
       socket.emit('matchmaking_error', 'An error occurred');
+    }
+  });  socket.on('leave_matchmaking', async ({ userId, gameId, entryAmount }) => {
+    try {
+      // Remove from matchmaking queue
+      const removedPlayer = await MatchmakingQueue.findOneAndDelete({ 
+        userId, 
+        gameId, 
+        entryAmount,
+        socketId: socket.id 
+      });
+      
+      if (removedPlayer) {
+        console.log(`Player ${userId} left matchmaking for ${gameId} with entry ${entryAmount}`);
+        socket.emit('matchmaking_cancelled', { refundAmount: entryAmount });
+      }
+    } catch (err) {
+      console.error('Leave matchmaking error:', err);
+    }
+  });
+
+  socket.on('matchmaking_timeout', async ({ userId, gameId, entryAmount }) => {
+    try {
+      // Remove from matchmaking queue on timeout
+      const removedPlayer = await MatchmakingQueue.findOneAndDelete({ 
+        userId, 
+        gameId, 
+        entryAmount,
+        socketId: socket.id 
+      });
+      
+      if (removedPlayer) {
+        console.log(`Player ${userId} matchmaking timeout for ${gameId} with entry ${entryAmount}`);
+        socket.emit('matchmaking_cancelled', { refundAmount: entryAmount });
+      }
+    } catch (err) {
+      console.error('Matchmaking timeout error:', err);
     }
   });
 

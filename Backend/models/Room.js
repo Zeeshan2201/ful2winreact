@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 
 const RoomSchema = new mongoose.Schema({
   gameId: { type: String, required: true },
+  entryAmount: { type: Number, required: true }, // Added entry amount field
   players: [
     {
       userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

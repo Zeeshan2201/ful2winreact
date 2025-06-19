@@ -5,7 +5,7 @@ const MatchmakingQueueSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
 //   gameId: { type: mongoose.Schema.Types.ObjectId, ref: 'Game', required: true },
   gameId: { type: String, required: true },
-
+  entryAmount: { type: Number, required: true }, // Added entry amount field
   socketId: { type: String, required: true },
   joinedAt: { type: Date, default: Date.now },
 });

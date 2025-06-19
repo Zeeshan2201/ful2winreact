@@ -111,10 +111,9 @@ useEffect(() => {
       console.log("Received waiting_for_opponent event");
       setStatus('matching');
       setTimeLeft(15);
-    });
-
-    socket.on('match_found', ({ roomId, players }) => {
+    });    socket.on('match_found', ({ roomId, players }) => {
       console.log("Received match_found event", { roomId, players });
+      // Only deduct entry fee when match is actually found
       deductEntryFee(entryFee);
       console.log("entryfees"+entryFee)
       localStorage.setItem("match_found", JSON.stringify({ roomId, players }));
@@ -132,6 +131,10 @@ useEffect(() => {
     socket.on('matchmaking_error', (msg) => {
       console.log("Received matchmaking_error event", msg);
       setStatus(`Error: ${msg}`);
+    });    socket.on('matchmaking_cancelled', ({ refundAmount }) => {
+      console.log("Matchmaking cancelled, refunding:", refundAmount);
+      // Refund the entry fee
+      addMoney(refundAmount, `Matchmaking cancelled - Refund for ${gameId}`);
     });
 
     socket.on('game_start', () => {
@@ -145,6 +148,7 @@ useEffect(() => {
       socket.off('waiting_for_opponent');
       socket.off('match_found');
       socket.off('matchmaking_error');
+      socket.off('matchmaking_cancelled');
       socket.off('game_start');
     };
   }, []);
@@ -163,8 +167,6 @@ localStorage.setItem('prizeAmount', prizeAmount.toString());
         console.log('Insufficient balance to deduct entry fee.');
     }
 }
-
-
   // Start matchmaking
   const findMatch = () => {
     if (!userId) {
@@ -176,7 +178,7 @@ localStorage.setItem('prizeAmount', prizeAmount.toString());
     setTimeLeft(15);
     
     setTimeout(() => {
-      socket.emit('join_matchmaking', { userId, gameId });
+      socket.emit('join_matchmaking', { userId, gameId, entryAmount: entryFee });
     }, 100);
   };
 
@@ -188,9 +190,7 @@ localStorage.setItem('prizeAmount', prizeAmount.toString());
       expiresIn: "10:00"
     });
     setStatus("actionGame");
-  };
-
-  // Countdown timer and match simulation
+  };  // Countdown timer and match simulation
   useEffect(() => {
     let timer;
     let queueTimer;
@@ -204,7 +204,9 @@ localStorage.setItem('prizeAmount', prizeAmount.toString());
         if (timeLeft > 0) {
           setTimeLeft(timeLeft - 1);
         } else {
-          // If no match found after 15 seconds, go back to waiting
+          // After 15 seconds, remove from queue and cancel matchmaking
+          console.log("Match timeout - removing from queue and cancelling");
+          socket.emit('matchmaking_timeout', { userId, gameId, entryAmount: entryFee });
           setStatus("waiting");
           setTimeLeft(15);
         }
@@ -257,9 +259,15 @@ localStorage.setItem('prizeAmount', prizeAmount.toString());
       }
     };
   }, []);
-
   // Handle exit/back navigation
   const handleExit = () => {
+    // If user is in matching state, cancel matchmaking and refund
+    if (status === "matching") {
+      console.log("Cancelling matchmaking...");
+      socket.emit('leave_matchmaking', { userId, gameId, entryAmount: entryFee });
+      setStatus("waiting");
+    }
+    
     if (onExit) {
       onExit();
     } else {
