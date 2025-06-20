@@ -80,14 +80,24 @@ router.get('/:id', async (req, res) => {
 // Register for tournament
 router.post('/:id/register', authMiddleware, async (req, res) => {
   try {
+    console.log('Tournament registration attempt:', {
+      tournamentId: req.params.id,
+      userId: req.user.id,
+      userInfo: req.user
+    });
+
     const tournament = await Tournament.findById(req.params.id);
     
     if (!tournament) {
+      console.log('Tournament not found:', req.params.id);
       return res.status(404).json({ message: 'Tournament not found' });
     }
 
+    console.log('Tournament found:', tournament.name, 'Current players:', tournament.currentPlayers);
+
     // Check if tournament is full
     if (tournament.currentPlayers >= tournament.maxPlayers) {
+      console.log('Tournament is full');
       return res.status(400).json({ message: 'Tournament is full' });
     }
 
@@ -97,18 +107,23 @@ router.post('/:id/register', authMiddleware, async (req, res) => {
     );
 
     if (alreadyRegistered) {
+      console.log('User already registered');
       return res.status(400).json({ message: 'Already registered for this tournament' });
     }
 
     // Check if user has enough coins/balance
     const user = await User.findById(req.user.id);
+    console.log('User found:', user.fullName, 'Coins:', user.coins, 'Required:', tournament.entryFee);
+    
     if (user.coins < tournament.entryFee) {
+      console.log('Insufficient coins');
       return res.status(400).json({ message: 'Insufficient coins' });
     }
 
     // Deduct entry fee
     user.coins -= tournament.entryFee;
     await user.save();
+    console.log('Coins deducted, new balance:', user.coins);
 
     // Register user
     tournament.registeredPlayers.push({
@@ -118,6 +133,7 @@ router.post('/:id/register', authMiddleware, async (req, res) => {
     
     tournament.currentPlayers += 1;
     await tournament.save();
+    console.log('User registered successfully, current players:', tournament.currentPlayers);
 
     res.json({ 
       message: 'Successfully registered for tournament',
@@ -126,7 +142,12 @@ router.post('/:id/register', authMiddleware, async (req, res) => {
     });
   } catch (error) {
     console.error('Error registering for tournament:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ 
+      message: 'Server error',
+      error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
@@ -296,6 +317,92 @@ router.post('/:id/finalize', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Error finalizing tournament:', error);
     res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// DEVELOPMENT ONLY - Create sample tournaments
+router.post('/dev/create-samples', async (req, res) => {
+  try {
+    // Only allow in development/testing
+    if (process.env.NODE_ENV === 'production') {
+      return res.status(403).json({ message: 'Not allowed in production' });
+    }
+
+    // Clear existing tournaments
+    await Tournament.deleteMany({});
+    
+    // Create sample FlappyBall tournaments
+    const tournaments = [
+      {
+        name: 'FlappyBall Championship - Morning',
+        game: 'flappyball',
+        startTime: new Date(Date.now() + 1000 * 60 * 30), // 30 minutes from now
+        endTime: new Date(Date.now() + 1000 * 60 * 60 * 2), // 2 hours from now
+        entryFee: 10,
+        maxPlayers: 50,
+        currentPlayers: 0,
+        prizeDistribution: {
+          first: 50,
+          second: 20,
+          third: 10
+        },
+        status: 'upcoming',
+        description: 'Morning FlappyBall tournament with amazing prizes!',
+        isActive: true,
+        registeredPlayers: [],
+        leaderboard: []
+      },
+      {
+        name: 'FlappyBall Championship - Afternoon',
+        game: 'flappyball',
+        startTime: new Date(Date.now() + 1000 * 60 * 60 * 4), // 4 hours from now
+        endTime: new Date(Date.now() + 1000 * 60 * 60 * 6), // 6 hours from now
+        entryFee: 15,
+        maxPlayers: 100,
+        currentPlayers: 0,
+        prizeDistribution: {
+          first: 50,
+          second: 20,
+          third: 10
+        },
+        status: 'upcoming',
+        description: 'Afternoon FlappyBall tournament with bigger prizes!',
+        isActive: true,
+        registeredPlayers: [],
+        leaderboard: []
+      },
+      {
+        name: 'FlappyBall Championship - Evening',
+        game: 'flappyball',
+        startTime: new Date(Date.now() + 1000 * 60 * 60 * 8), // 8 hours from now
+        endTime: new Date(Date.now() + 1000 * 60 * 60 * 10), // 10 hours from now
+        entryFee: 20,
+        maxPlayers: 150,
+        currentPlayers: 0,
+        prizeDistribution: {
+          first: 50,
+          second: 20,
+          third: 10
+        },
+        status: 'upcoming',
+        description: 'Evening FlappyBall tournament - the biggest event of the day!',
+        isActive: true,
+        registeredPlayers: [],
+        leaderboard: []
+      }
+    ];
+
+    const createdTournaments = await Tournament.insertMany(tournaments);
+    console.log('Sample tournaments created:', createdTournaments.length);
+    
+    res.json({ 
+      message: 'Sample tournaments created successfully',
+      count: createdTournaments.length,
+      tournaments: createdTournaments
+    });
+  } catch (error) {
+    console.error('Error creating sample tournaments:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 

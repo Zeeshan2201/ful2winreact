@@ -56,12 +56,55 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/tictactoe', ticTacToeGameRoutes);
 app.use('/api/game', rockPaperGameRoutes);
-app.use('/api/tournaments', tournamentRoutes);
+app.use('/api/tournaments', tournamentRoutes); // Tournament routes
 app.use('/api/protected', protected); // secured routes
 app.use('/api/duckhunt', DuckHunt); // secured routes
 app.use('/api/dicegame', diceGameRoutes); // secured routes
 app.use('/api/coinflip', coinflipGameRoutes); // secured routes
-app.use('/api/tournament', tournamentRoutes); // secured routes
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    message: 'Server is running',
+    environment: process.env.NODE_ENV || 'development',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Enhanced error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Global error handler:', err);
+  
+  // Mongoose validation error
+  if (err.name === 'ValidationError') {
+    const errors = Object.values(err.errors).map(e => e.message);
+    return res.status(400).json({
+      message: 'Validation Error',
+      errors
+    });
+  }
+  
+  // Mongoose cast error (invalid ObjectId)
+  if (err.name === 'CastError') {
+    return res.status(400).json({
+      message: 'Invalid ID format'
+    });
+  }
+  
+  // JWT errors
+  if (err.name === 'JsonWebTokenError') {
+    return res.status(401).json({
+      message: 'Invalid token'
+    });
+  }
+  
+  // Default error
+  res.status(500).json({
+    message: 'Internal Server Error',
+    error: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
+  });
+});
 
 // Socket.IO Connection
 // Track connected users to prevent duplicate connections

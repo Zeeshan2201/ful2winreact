@@ -41,10 +41,12 @@ const TournamentPage = () => {
     } catch (error) {
       console.error('Error fetching user registrations:', error);
     }
-  };
-  const handleRegister = async (tournamentId) => {
+  };  const handleRegister = async (tournamentId) => {
     try {
-      await tournamentApi.registerForTournament(tournamentId);
+      console.log('Attempting to register for tournament:', tournamentId);
+      const result = await tournamentApi.registerForTournament(tournamentId);
+      console.log('Registration successful:', result);
+      
       setUserRegistrations([...userRegistrations, tournamentId]);
       
       // Update current players count
@@ -53,11 +55,31 @@ const TournamentPage = () => {
           ? { ...t, currentPlayers: t.currentPlayers + 1 }
           : t
       ));
+      
+      // Show success message
+      alert(`Successfully registered for tournament! Remaining coins: ${result.remainingCoins || 'N/A'}`);
     } catch (error) {
       console.error('Error registering for tournament:', error);
-      alert(error.message);
+      
+      // Provide user-friendly error messages
+      let errorMessage = 'Failed to register for tournament';
+      if (error.message.includes('Insufficient coins')) {
+        errorMessage = 'You don\'t have enough coins to join this tournament. Please add more coins to your wallet.';
+      } else if (error.message.includes('Already registered')) {
+        errorMessage = 'You are already registered for this tournament.';
+      } else if (error.message.includes('Tournament is full')) {
+        errorMessage = 'This tournament is full. Please try joining another tournament.';
+      } else if (error.message.includes('Tournament not found')) {
+        errorMessage = 'Tournament not found. It may have been cancelled or ended.';
+      } else if (error.message.includes('Server error')) {
+        errorMessage = 'Server error. Please try again later or contact support.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      alert(errorMessage);
     }
-  };  const [gameModalOpen, setGameModalOpen] = useState(false);
+  };const [gameModalOpen, setGameModalOpen] = useState(false);
   const [selectedTournamentId, setSelectedTournamentId] = useState(null);
   const [selectedTournament, setSelectedTournament] = useState(null);
   const [leaderboard, setLeaderboard] = useState([]);
