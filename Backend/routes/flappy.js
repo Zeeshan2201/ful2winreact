@@ -1,7 +1,7 @@
 // routes/matchRoutes.js
 const express = require('express');
 const router = express.Router();
-const Match = require('../models/Fluppy');
+const Match = require('../models/Flappy');
 
 // Create a new match
 router.post('/matches', async (req, res) => {
