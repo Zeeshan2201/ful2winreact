@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import io from 'socket.io-client';
 import Confetti from 'react-confetti'; // Assumed import for WinBurst
+import API_CONFIG from '../../config/api.js';
 
 // Base URL for API
-const BASE_URL = 'http://localhost:5000/api';
+const BASE_URL = `${API_CONFIG.BASE_URL}/api`;
 
 // Initialize Socket.IO client
-const socket = io('http://localhost:5000', {
+const socket = io(API_CONFIG.SOCKET_URL, {
   withCredentials: true,
   transports: ['websocket', 'polling'],
 });

@@ -6,6 +6,7 @@ import socket from "../../socekt";
 import { motion } from "framer-motion";
 import { Trophy, Users } from "lucide-react";
 import Confetti from "react-confetti";
+import API_CONFIG from '../../config/api.js';
 import "./roundHighlight.css";
 import "./rollDiceBtn.css";
 
@@ -278,7 +279,7 @@ export default function DiceGameLogic() {
   const hasLeftRoomsRef = useRef(false);
   const retryCountRef = useRef(0);
 
-  const BASE_URL = "http://localhost:5000";
+const BASE_URL = API_CONFIG.BASE_URL;
 
   const [gameState, setGameState] = useState({
     isInitialized: false,

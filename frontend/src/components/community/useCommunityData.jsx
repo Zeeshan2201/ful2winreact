@@ -73,7 +73,9 @@ const initialGameOptions = [
   { id: 5, name: "Shooter" },
 ]
 
-const API_BASE_URL = "http://localhost:5000"; // Force local development
+import API_CONFIG from '../../config/api.js';
+
+const API_BASE_URL = API_CONFIG.BASE_URL; // Use centralized config
 
 export default function useCommunityData() {
   const [users, setUsers] = useState([]) // Initialize with empty array

@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react"
 
-const API_BASE_URL = "http://localhost:5000"; // Force local development
+import API_CONFIG from '../../config/api.js';
+
+const API_BASE_URL = API_CONFIG.BASE_URL; // Use centralized config
 
 export default function UserRankings({ users, rankingType, handleProfileClick }) {
   const [currentUserData, setCurrentUserData] = useState(null)

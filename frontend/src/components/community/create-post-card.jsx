@@ -3,7 +3,9 @@
 import { useState, useRef, useEffect } from "react"
 import { PlusCircle, X, Send, Calendar, Tag, BarChart2, ImageIcon, Film, Music, Palette, UserPlus } from "lucide-react"
 
-const API_BASE_URL = "http://localhost:5000"; // Force local development// Use production URL in production, local in development
+import API_CONFIG from '../../config/api.js';
+
+const API_BASE_URL = API_CONFIG.BASE_URL; // Use centralized config
 
 export default function CreatePostCard({
   createPost,

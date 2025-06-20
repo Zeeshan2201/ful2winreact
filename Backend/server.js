@@ -25,7 +25,7 @@ const server = http.createServer(app);
 // Setup Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3000","http://localhost:5173",  "https://ful2winreact.onrender.com"],  // Your deployed frontend URL
+    origin: ["http://localhost:3000","http://localhost:5173", "https://ful2win-u83b.onrender.com", "https://ful2winreact.onrender.com"],  // Local + Deployed URLs
     methods: ["GET", "POST", "PUT"],
     allowedHeaders: "*",
     credentials: true,
@@ -39,7 +39,7 @@ app.use((req, res, next) => {
   next();
 });
 app.use(cors({
-  origin: ["http://localhost:3000","http://localhost:5173",  "https://ful2winreact.onrender.com"],
+  origin: ["http://localhost:3000","http://localhost:5173", "https://ful2win-u83b.onrender.com", "https://ful2winreact.onrender.com"],
   methods: ["GET", "POST", "PUT"],
   allowedHeaders: "*",
   credentials: true
