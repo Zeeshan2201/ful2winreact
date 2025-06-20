@@ -93,8 +93,7 @@ router.post("/verify-token", (req, res) => {
   }
 
   try {
-    const decoded = jwt.verify(token, "your_jwt_secret_key");
-    // const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET); // Use consistent JWT_SECRET
     res.json({ valid: true });
   } catch (err) {
     res.status(401).json({ valid: false });

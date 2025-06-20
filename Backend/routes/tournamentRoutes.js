@@ -82,9 +82,14 @@ router.post('/:id/register', authMiddleware, async (req, res) => {
   try {
     console.log('Tournament registration attempt:', {
       tournamentId: req.params.id,
-      userId: req.user.id,
+      userId: req.user ? req.user.id : 'No user',
       userInfo: req.user
     });
+
+    if (!req.user || !req.user.id) {
+      console.log('No user found in request');
+      return res.status(401).json({ message: 'Authentication required' });
+    }
 
     const tournament = await Tournament.findById(req.params.id);
     
@@ -109,13 +114,17 @@ router.post('/:id/register', authMiddleware, async (req, res) => {
     if (alreadyRegistered) {
       console.log('User already registered');
       return res.status(400).json({ message: 'Already registered for this tournament' });
-    }
-
-    // Check if user has enough coins/balance
+    }    // Check if user has enough coins/balance
     const user = await User.findById(req.user.id);
-    console.log('User found:', user.fullName, 'Coins:', user.coins, 'Required:', tournament.entryFee);
     
-    if (user.coins < tournament.entryFee) {
+    if (!user) {
+      console.log('User not found in database:', req.user.id);
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    console.log('User found:', user.fullName || user.phoneNumber || user.username || 'Unknown', 'Coins:', user.coins, 'Required:', tournament.entryFee);
+    
+    if (!user.coins || user.coins < tournament.entryFee) {
       console.log('Insufficient coins');
       return res.status(400).json({ message: 'Insufficient coins' });
     }

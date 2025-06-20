@@ -1,5 +1,8 @@
 const jwt = require("jsonwebtoken");
 
+// Use consistent JWT secret
+const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
+
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1]; // Bearer <token>
@@ -17,7 +20,7 @@ const authenticateToken = (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, "your_jwt_secret_key");
+    const decoded = jwt.verify(token, JWT_SECRET); // Use consistent JWT_SECRET
     
     if (process.env.NODE_ENV === 'development') {
       console.log('Auth middleware - Decoded token:', decoded);

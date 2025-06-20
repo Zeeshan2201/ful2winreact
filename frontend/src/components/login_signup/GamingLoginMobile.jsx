@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { useNavigate } from 'react-router-dom';
+import authApi from '../../utils/authApi';
 import {
   FaGoogle,
   FaPhoneAlt,
@@ -633,19 +634,7 @@ const handleLogin = async (e) => {
 
   setIsLoading(true);
   try {
-    const response = await fetch('http://localhost:5000/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      
-      body: JSON.stringify({
-        phoneNumber: loginForm.phone,
-        password: loginForm.password,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) throw new Error(data.message);
+    const data = await authApi.login(loginForm.phone, loginForm.password);
 
     // Save token & user in localStorage
     localStorage.setItem('token', data.token);
@@ -659,7 +648,6 @@ const handleLogin = async (e) => {
     setIsLoading(false);
   }
 };
-
 
 
   // Mock signup function
@@ -694,34 +682,15 @@ const handleLogin = async (e) => {
   setIsLoading(true);
 
   try {
-    const response = await fetch('http://localhost:5000/api/auth/signup', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        fullName: signupForm.name,
-        phoneNumber: signupForm.phone,
-        password: signupForm.password,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Signup failed');
-    }
-// setSignupForm((prev) => ({
-//   ...prev,
-//    touched: {
-//       name: "",
-//       phone: "",
-//       password: "",
-//       confirmPassword: "",
-//    },
-//   }));
-    // alert(`✅ Account created successfully for ${signupForm.name}!`);
-    // You can also redirect or clear form here
+    const data = await authApi.signup(signupForm.name, signupForm.phone, signupForm.password);
+    
+    alert(`✅ Account created successfully for ${signupForm.name}!`);
+    
+    // Optionally auto-login the user after successful signup
+    // localStorage.setItem('token', data.token);
+    // localStorage.setItem('user', JSON.stringify(data.user));
+    // navigate('/');
+    
   } catch (error) {
     alert(`❌ Signup Error: ${error.message}`);
   } finally {

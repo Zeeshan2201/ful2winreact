@@ -229,13 +229,12 @@ const TournamentPlayPage = () => {
                         {getRankIcon(player.rank || index + 1)}
                       </div>
                       
-                      <div className="flex-shrink-0">
-                        <img
-                          src={player.userId?.avatar || `/avatars/${index + 1}.png`}
+                      <div className="flex-shrink-0">                        <img
+                          src={player.userId?.avatar || `https://ui-avatars.com/api/?name=${player.userId?.username || player.username || 'Player'}&background=6366f1&color=fff`}
                           alt={player.userId?.username || player.username}
                           className="w-8 h-8 rounded-full"
                           onError={(e) => {
-                            e.target.src = `https://ui-avatars.com/api/?name=${player.userId?.username || player.username}&background=6366f1&color=fff`;
+                            e.target.src = `https://ui-avatars.com/api/?name=${player.userId?.username || player.username || 'Player'}&background=6366f1&color=fff`;
                           }}
                         />
                       </div>
