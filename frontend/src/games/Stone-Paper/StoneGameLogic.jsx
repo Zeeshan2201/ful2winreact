@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react"
 import { Scissors, FileText, Hand, CloudCog } from "lucide-react"
-import socket from '../../socekt'
+import socket from '../../socket'
 import axios from 'axios'
 import API_CONFIG from '../../config/api.js';
 

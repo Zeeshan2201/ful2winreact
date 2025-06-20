@@ -124,3 +124,31 @@ body {
   border-radius: 8px;
 }
 
+/* Additional utility classes */
+.text-silver-400 {
+  color: #c0c0c0;
+}
+
+.text-bronze-400 {
+  color: #cd7f32;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Mobile-first responsive utilities */
+@media (max-width: 640px) {
+  .sm-hide {
+    display: none;
+  }
+}
+
+/* Ensure modal is always on top */
+.modal-overlay {
+  z-index: 10000;
+}
+

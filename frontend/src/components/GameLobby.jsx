@@ -449,7 +449,7 @@
 // export default GameLobby; 
 // src/components/FindMatchButton.jsx
 import React, { useEffect, useState } from 'react';
-import socket from '../socekt';
+import socket from '../socket';
 const userId = '6650b1a123abc456def00001'; // Replace with logged-in user ID
   const gameId = '6650c2b234def789abc00001';
 const FindMatchButton = ({ userId, gameId }) => {

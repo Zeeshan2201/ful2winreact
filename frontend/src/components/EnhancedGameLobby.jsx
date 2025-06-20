@@ -12,7 +12,7 @@ import DiceGameLogic from "../games/Dice/DiceGameLogic";
 import StoneGameLogic from "../games/Stone-Paper/StoneGameLogic";
 import DuckHuntGame from "../games/DuckHunt/logic";
 import FlappyBallGameLogic from "../games/Flappyball/FlappyBallGameLogic";
-import socket from '../socekt';
+import socket from '../socket';
 const EnhancedGameLobby = ({
   entryFee = 10,
   gameMode = "Classic",

@@ -2,67 +2,82 @@
 
 This file explains the environment configuration for both local development and production deployment.
 
+## Current Configuration
+
+**Database**: Always uses MongoDB Atlas (Hosted Cloud Database)
+**API**: Can be configured to use local or hosted backend
+
 ## Environment URLs
 
-### Local Development
-- **Backend**: http://localhost:5000
-- **Frontend**: http://localhost:5173
-- **Database**: MongoDB Local (mongodb://localhost:27017/gameDB)
+### Current Setup (Hosted Database + Configurable Backend)
+- **Database**: MongoDB Atlas (Cloud) - Always used
+- **Backend**: Configurable in `frontend/src/config/api.js`
+- **Frontend**: Local development or deployed
 
-### Production (Deployed)
+### Available Configurations
+
+#### Option 1: Full Hosted (Current Setting)
 - **Backend**: https://ful2winreact.onrender.com
 - **Frontend**: https://ful2win-u83b.onrender.com
 - **Database**: MongoDB Atlas (Cloud)
 
-## How It Works
+#### Option 2: Local Frontend + Hosted Backend & Database
+- **Backend**: https://ful2winreact.onrender.com
+- **Frontend**: http://localhost:5173 (Local development)
+- **Database**: MongoDB Atlas (Cloud)
 
-The application automatically detects the environment using `process.env.NODE_ENV`:
+#### Option 3: Local Backend + Hosted Database
+- **Backend**: http://localhost:5000 (Local development)
+- **Frontend**: http://localhost:5173 (Local development)  
+- **Database**: MongoDB Atlas (Cloud)
 
-- **Development**: Uses local URLs and local MongoDB
-- **Production**: Uses deployed URLs and MongoDB Atlas
+## How to Switch Configurations
+
+### To Use Hosted Backend (Current Setting)
+In `frontend/src/config/api.js`, set:
+```javascript
+const FORCE_PRODUCTION = true;
+```
+
+### To Use Local Backend
+In `frontend/src/config/api.js`, set:
+```javascript
+const FORCE_PRODUCTION = false;
+```
+
+## Database Configuration
+
+The database is always MongoDB Atlas (hosted) as configured in `Backend/config/db.js`:
+- **Connection**: `mongodb+srv://boostnowchat:boostnowchat@cluster0.rxw5wva.mongodb.net/gamedb`
+- **This ensures data consistency across all environments**
 
 ## Configuration Files
 
 ### Backend
-- `config/db.js` - Database configuration
-- `server.js` - CORS and Socket.IO configuration
+- `config/db.js` - Always uses MongoDB Atlas
+- `server.js` - CORS configured for all frontend URLs
 
-### Frontend
-- `src/config/api.js` - Centralized API configuration
-- All game components and services use this centralized config
+### Frontend  
+- `src/config/api.js` - API configuration with FORCE_PRODUCTION flag
+- All game components use this centralized config
 
 ## Running the Application
 
-### Local Development
+### Current Setup (Hosted Backend + Local Frontend)
 ```bash
-# Backend
+# Backend (uses hosted MongoDB Atlas)
 cd Backend
-npm run local
+npm start
 
-# Frontend
+# Frontend (connects to hosted backend)
 cd frontend
 npm run dev
 ```
 
-### Production Build
-```bash
-# Frontend
-cd frontend
-npm run build
+## Benefits of Current Setup
 
-# Backend
-cd Backend
-npm run production
-```
-
-## CORS Configuration
-
-The backend allows requests from:
-- http://localhost:3000 (React development server)
-- http://localhost:5173 (Vite development server)
-- https://ful2win-u83b.onrender.com (Deployed frontend)
-- https://ful2winreact.onrender.com (Legacy frontend URL)
-
-## Socket.IO Configuration
-
-Socket.IO connections are configured to work with both local and deployed environments automatically.
+1. **Data Consistency**: All environments use the same hosted database
+2. **Reliability**: No dependency on local MongoDB installation
+3. **Flexibility**: Easy to switch between local and hosted backend
+4. **Scalability**: Database can handle multiple concurrent users
+5. **Backup**: Cloud database has automatic backups

@@ -24,8 +24,19 @@ router.post('/signup', async (req, res) => {
       return res.status(400).json({ message: 'Phone number already registered' });
     }
 
+    // Generate username from fullName and random number
+    const baseUsername = fullName.toLowerCase().replace(/\s+/g, '');
+    const randomSuffix = Math.floor(Math.random() * 10000);
+    const username = `${baseUsername}${randomSuffix}`;
+
     // Create new user
-    const newUser = new User({ fullName, phoneNumber, password });
+    const newUser = new User({ 
+      fullName, 
+      phoneNumber, 
+      password, 
+      username,
+      coins: 100 // Give new users 100 coins to start
+    });
     await newUser.save();
 
     res.status(201).json({ message: 'Signup successful' });
@@ -57,15 +68,16 @@ router.post('/login', async (req, res) => {
       { userId: user._id, phoneNumber: user.phoneNumber },
       JWT_SECRET,
       { expiresIn: '7d' } // token expires in 7 days
-    );
-
-    res.status(200).json({
+    );    res.status(200).json({
       message: 'Login successful',
       token,
       user: {
+        id: user._id,
         fullName: user.fullName,
         phoneNumber: user.phoneNumber,
-        _id:user._id,
+        username: user.username,
+        coins: user.coins,
+        _id: user._id,
       }
     });
   } catch (err) {

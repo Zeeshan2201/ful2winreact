@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
-import socket from "../../socekt";
+import socket from "../../socket";
 import { motion } from "framer-motion";
 import { Trophy, Users } from "lucide-react";
 import Confetti from "react-confetti";

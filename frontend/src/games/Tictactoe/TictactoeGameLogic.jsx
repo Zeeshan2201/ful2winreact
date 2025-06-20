@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import socket from '../../socekt'
+import socket from '../../socket'
 import axios from 'axios'
 import Confetti from "react-confetti";
 import API_CONFIG from '../../config/api.js';

@@ -1,5 +1,3 @@
-
-
 const express = require('express');
 const http = require('http');
 const cors = require('cors');
@@ -19,6 +17,7 @@ const userRoutes = require('./routes/userRoutes');
 const DuckHunt = require('./models/DuckHunt');
 const diceGameRoutes = require('./routes/diceGameRoutes');
 const coinflipGameRoutes = require('./routes/coinflipGameRoutes');
+const tournamentRoutes = require('./routes/tournamentRoutes');
 const app = express();
 const server = http.createServer(app);
 
@@ -57,15 +56,59 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/tictactoe', ticTacToeGameRoutes);
 app.use('/api/game', rockPaperGameRoutes);
+app.use('/api/tournaments', tournamentRoutes);
 app.use('/api/protected', protected); // secured routes
 app.use('/api/duckhunt', DuckHunt); // secured routes
 app.use('/api/dicegame', diceGameRoutes); // secured routes
 app.use('/api/coinflip', coinflipGameRoutes); // secured routes
+app.use('/api/tournament', tournamentRoutes); // secured routes
 
 // Socket.IO Connection
+// Track connected users to prevent duplicate connections
+const connectedUsers = new Map();
 
 io.on('connection', (socket) => {
   console.log('New client connected:', socket.id);
+    // Handle user identification and prevent duplicate connections
+  socket.on('user_identify', (userData) => {
+    const { userId } = userData;
+    
+    // If user is already connected, disconnect the old connection
+    if (connectedUsers.has(userId)) {
+      const oldSocketId = connectedUsers.get(userId);
+      const oldSocket = io.sockets.sockets.get(oldSocketId);
+      if (oldSocket) {
+        console.log(`Disconnecting old connection for user ${userId}: ${oldSocketId}`);
+        oldSocket.disconnect(true);
+      }
+    }
+    
+    // Store new connection
+    connectedUsers.set(userId, socket.id);
+    socket.userId = userId;
+    console.log(`User ${userId} connected with socket ${socket.id}`);
+  });
+
+  // Handle user connection (legacy support)
+  socket.on('user_connect', (userData) => {
+    const { userId } = userData;
+    
+    // If user is already connected, disconnect the old connection
+    if (connectedUsers.has(userId)) {
+      const oldSocketId = connectedUsers.get(userId);
+      const oldSocket = io.sockets.sockets.get(oldSocketId);
+      if (oldSocket) {
+        console.log(`Disconnecting old connection for user ${userId}: ${oldSocketId}`);
+        oldSocket.disconnect(true);
+      }
+    }
+    
+    // Store new connection
+    connectedUsers.set(userId, socket.id);
+    socket.userId = userId;
+    console.log(`User ${userId} connected with socket ${socket.id}`);
+  });
+
   socket.on('join_matchmaking', async ({ userId, gameId, entryAmount }) => {
     try {
       // Check for existing player in queue with same gameId, different userId, and SAME entryAmount
@@ -139,11 +182,21 @@ io.on('connection', (socket) => {
       console.error('Matchmaking timeout error:', err);
     }
   });
-
-  socket.on('disconnect', async () => {
-    console.log('Client disconnected:', socket.id);
+  socket.on('disconnect', async (reason) => {
+    console.log('Client disconnected:', socket.id, 'Reason:', reason);
+    
+    // Clean up user from connected users map
+    if (socket.userId) {
+      connectedUsers.delete(socket.userId);
+      console.log(`User ${socket.userId} disconnected and cleaned up`);
+    }
+    
     // Remove from matchmaking queue on disconnect
-    await MatchmakingQueue.deleteOne({ socketId: socket.id });
+    try {
+      await MatchmakingQueue.deleteOne({ socketId: socket.id });
+    } catch (err) {
+      console.error('Error cleaning up matchmaking queue:', err);
+    }
   });
 });
 

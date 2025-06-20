@@ -8,6 +8,11 @@ const userSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  username: {
+    type: String,
+    unique: true,
+    sparse: true // Allow null values while maintaining uniqueness
+  },
   phoneNumber: {
     type: String,
     required: true,
@@ -23,6 +28,19 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  coins: {
+    type: Number,
+    default: 100 // Give new users 100 coins to start
+  },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user'
+  },
+  avatar: {
+    type: String,
+    default: null
+  },
   followers: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -33,6 +51,8 @@ const userSchema = new mongoose.Schema({
     ref: 'User',
     default: []
   }]
+}, {
+  timestamps: true
 });
 
 // Hash password before saving

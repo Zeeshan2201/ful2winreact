@@ -8,7 +8,11 @@ const authenticateToken = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, "your_jwt_secret_key");
-    req.user = decoded; // Save user info in req.user
+    req.user = { 
+      id: decoded.userId, // Map userId to id for consistency
+      userId: decoded.userId,
+      phoneNumber: decoded.phoneNumber 
+    };
     next();
   } catch (err) {
     return res.status(403).json({ message: "Invalid or expired token" });

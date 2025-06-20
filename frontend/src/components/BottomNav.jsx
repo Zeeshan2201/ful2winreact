@@ -1,10 +1,11 @@
 import React from 'react';
-import { Home, Gamepad2, Users, User } from 'lucide-react';
+import { Home, Gamepad2, Users, User, Trophy } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 const navigation = [
   { name: 'Home', icon: Home, href: '/' },
   { name: 'Games', icon: Gamepad2, href: '/games' },
+  { name: 'Tournaments', icon: Trophy, href: '/tournaments' },
   { name: 'Community', icon: Users, href: '/community' },
   { name: 'Profile', icon: User, href: '/profile' },
 ];
@@ -17,10 +18,9 @@ export default function BottomNav() {
     <div className="fixed bottom-0 left-0 right-0 z-[9999]">
       <div className="mx-auto max-w-2xl">
         <div className="glass-effect bg-gradient-to-tr from-gray-900/95 via-purple-900/90 to-gray-900/95 backdrop-blur-xl border-t border-gray-800/50 shadow-2xl rounded-t-2xl flex justify-around items-center h-20 px-2">
-          
-          {/* Left Navigation Items */}
+            {/* Left Navigation Items */}
           <div className="flex-1 flex justify-around">
-            {navigation.slice(0, 2).map((item) => {
+            {navigation.slice(0, 3).map((item) => {
               const isActive = currentPath === item.href;
               return (
                 <Link
@@ -59,11 +59,9 @@ export default function BottomNav() {
                 className="h-14 w-14 rounded-2xl bg-white/90 shadow-md"
               />
             </Link>
-          </div>
-
-          {/* Right Navigation Items */}
+          </div>          {/* Right Navigation Items */}
           <div className="flex-1 flex justify-around">
-            {navigation.slice(2).map((item) => {
+            {navigation.slice(3).map((item) => {
               const isActive = currentPath === item.href;
               return (
                 <Link

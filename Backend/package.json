@@ -6,7 +6,10 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "local": "set NODE_ENV=development&& node server.js",
-    "production": "set NODE_ENV=production&& node server.js"
+    "production": "set NODE_ENV=production&& node server.js",
+    "seed:tournaments": "node scripts/seedTournaments.js",
+    "update:users": "node scripts/updateUsers.js",
+    "create:daily": "node scripts/createDailyTournaments.js"
   },
   "keywords": [],
   "author": "",

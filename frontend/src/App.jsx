@@ -1,10 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { WalletProvider } from './context/WalletContext';
+import socketManager from './utils/socketManager';
 
 // Pages
 import Home from './pages/home';
 import GamesPage from './pages/games';
+import TournamentPage from './pages/TournamentPage';
+import TournamentPlayPage from './pages/TournamentPlayPage';
 
 // Components
 import Navbar from './components/Navbar';
@@ -43,7 +46,7 @@ import TictactoeGameLogic from './games/Tictactoe/TictactoeGameLogic';
 import PrivateRoute from './components/PrivateRoute';
 import NotFound from './pages/NotFound';
 import DuckHuntGame from './games/DuckHunt/logic';
-import Flappyball from './games/Flappyball/Flappyball';
+import HostedFlappyBallGame from './games/Flappyball/HostedFlappyBallGame';
 
 function HomePage() {
   const [showSplash, setShowSplash] = useState(true);
@@ -253,6 +256,36 @@ function HomePage() {
 }
 
 function App() {
+  // Initialize socket connection when app starts
+  useEffect(() => {
+    const initSocket = () => {
+      const user = localStorage.getItem('user');
+      if (user) {
+        socketManager.initializeSocket();
+      }
+    };
+
+    // Initialize on mount
+    initSocket();
+
+    // Listen for storage changes (user login/logout)
+    const handleStorageChange = (e) => {
+      if (e.key === 'user') {
+        if (e.newValue) {
+          socketManager.updateUser();
+        } else {
+          socketManager.disconnect();
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
   return (
     <WalletProvider>
       <Router>
@@ -306,8 +339,7 @@ function App() {
             gameImage="/DuckHuntGame.jpg"
             gameCategory="Board"
           /></PrivateRoute>
-        } />
-        <Route path="/games/flappyball" element={<PrivateRoute>
+        } />        <Route path="/games/flappyball" element={<PrivateRoute>
           <GameDashboard 
             gameTitle="FlappyBall" 
             gameImage="/flappyball.svg"
@@ -321,15 +353,11 @@ function App() {
         <Route path="/games/dice/play" element={<PrivateRoute><DiceDuel /></PrivateRoute>} />
         <Route path="/games/coinflip/play" element={<PrivateRoute><CoinFlipBet /></PrivateRoute>} />
         <Route path="/games/DuckHuntGame/play" element={<PrivateRoute><DuckHuntGame /></PrivateRoute>} />
-        <Route path="/games/flappyball/play" element={<PrivateRoute><Flappyball /></PrivateRoute>} />
+        <Route path="/games/flappyball/play" element={<PrivateRoute><HostedFlappyBallGame /></PrivateRoute>} />
         
-        {/* Coming Soon Games */}
-        <Route path="/games/ludo" element={<PrivateRoute><ComingSoonPage /></PrivateRoute>} />
-        <Route path="/games/carrom" element={<PrivateRoute><ComingSoonPage /></PrivateRoute>} />
-        <Route path="/games/chess" element={<PrivateRoute><ComingSoonPage /></PrivateRoute>} />
-        <Route path="/games/uno" element={<PrivateRoute><ComingSoonPage /></PrivateRoute>} />
-        <Route path="/games/bgmi" element={<PrivateRoute><ComingSoonPage /></PrivateRoute>} />
-        <Route path="/games/freefire" element={<PrivateRoute><ComingSoonPage /></PrivateRoute>} />
+        {/* Tournament Routes */}
+        <Route path="/tournaments" element={<PrivateRoute><TournamentPage /></PrivateRoute>} />
+        <Route path="/tournament/:tournamentId/play" element={<PrivateRoute><TournamentPlayPage /></PrivateRoute>} />
         
         {/* Other App Routes */}
         <Route path="/community" element={<PrivateRoute><CommunityWrapper /></PrivateRoute>} />
